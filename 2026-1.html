@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>[집계] 2026년 1분기 8values 종합 - 국민의 정부 갤러리</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="2026년 1분기 국민의 정부 갤러리 8values 결과 종합. 참여 34명, 갤 평균 판정 민주사회주의.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="[집계] 2026년 1분기 국붕갤 8values 종합">
+<meta property="og:description" content="참여 34명 · 갤 평균 판정 민주사회주의 · 이념 분포, 성향 거리, 좌파력, 상관계수">
+<script>
+  /* 페이지가 그려지기 전에 테마를 정해 깜빡임을 막습니다 */
+  (function () {
+    var t = null;
+    try { t = localStorage.getItem('8values-theme'); } catch (e) {}
+    if (t !== 'light' && t !== 'dark') {
+      t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+    }
+    document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+<style>
+/* ---- 공통 기반 ---- */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; }
+[hidden] { display: none !important; }
+table { border-collapse: collapse; }
+button { font: inherit; color: inherit; cursor: pointer; }
+.tab-panel { display: none; }
+.tab-panel.is-active { display: block; }
+.mx-table th, .mx-table td { min-width: 60px; width: 60px; text-align: center; white-space: nowrap; }
+.mx-head { cursor: pointer; }
+.chart-box { position: relative; height: 16rem; }
+.ideo-track { position: relative; overflow: hidden; }
+.ideo-fill { position: absolute; inset: 0 auto 0 0; width: var(--rel); }
+.ax-bar { display: flex; }
+.ax-seg { overflow: hidden; white-space: nowrap; }
+/* 전체 보기 창: 표 하나를 통째로 확대·축소 */
+.modal { position: fixed; inset: 0; z-index: 100; display: flex; padding: clamp(.4rem, 2vw, 1.5rem); }
+.modal-sheet { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+.modal-head { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .8rem; }
+.modal-head h3 { margin: 0 auto 0 0; }
+.zoom-tools { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem; }
+.zbtn { min-width: 2.3rem; height: 2.3rem; padding: 0 .7rem; font-weight: 700; line-height: 1; }
+.zoom-level { min-width: 3.6rem; text-align: center; font-variant-numeric: tabular-nums; font-size: .9rem; }
+.zoom-stage { flex: 1; min-height: 0; overflow: auto; margin-top: .8rem; cursor: grab; touch-action: pan-x pan-y; overscroll-behavior: contain; }
+.zoom-stage.is-dragging { cursor: grabbing; user-select: none; }
+.zoom-sizer { position: relative; }
+.zoom-sizer > table { position: absolute; top: 0; left: 0; transform-origin: 0 0; }
+#full-table-container th, #full-table-container td { position: static !important; }
+.zoom-hint { flex: none; margin: .6rem 0 0; font-size: .8rem; opacity: .75; max-width: none; }
+/* 버튼 묶음, 닉네임 검색, 상관계수 */
+.foot-btns { display: flex; flex-wrap: wrap; gap: .5rem; }
+.name-search { margin: 0 0 1.3rem; }
+.name-search label { display: block; font-size: .85rem; font-weight: 700; margin-bottom: .35rem; }
+.ns-row { display: flex; gap: .4rem; max-width: 26rem; }
+.ns-row input { flex: 1; min-width: 0; font: inherit; padding: .5rem .75rem; }
+.ns-btn { padding: 0 1.1rem; font-weight: 700; }
+.ns-msg { margin: .45rem 0 0; font-size: .85rem; max-width: none; }
+.ns-msg:empty { display: none; }
+.ns-hit { margin: .2rem .3rem 0 0; padding: .15rem .6rem; font-size: .82rem; }
+.corr-list { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; gap: 0; }
+.corr-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .15rem 1.2rem; align-items: start; padding: .85rem 0; }
+.corr-pair { font-weight: 700; }
+.corr-text { grid-column: 1; margin: 0; max-width: 40em; }
+.corr-meta { grid-column: 2; grid-row: 1 / span 2; text-align: right; }
+.corr-r { display: block; font-size: 1.5rem; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.corr-str { display: block; font-size: .8rem; opacity: .8; white-space: nowrap; }
+.corr-chance { display: block; font-size: .75rem; opacity: .6; white-space: nowrap; }
+.corr-table th, .corr-table td { min-width: 6rem; font-variant-numeric: tabular-nums; }
+.corr-foot { display: flex; justify-content: flex-end; margin-top: .8rem; }
+.corr-note { margin-top: 1.3rem; font-size: .9rem; }
+.corr-note p { margin: 0 0 .55rem; max-width: 46em; }
+.corr-note b { margin-right: .4rem; }
+.corr-caution { opacity: .75; }
+.leftist-note { max-width: 46em; }
+/* 이념 콤보박스 */
+.cb-field { position: relative; flex: 1; min-width: 0; display: flex; }
+.ns-row .cb-field input { flex: 1; width: 100%; min-width: 0; padding-right: 2.6rem; }
+.cb-arrow { position: absolute; top: 1px; right: 1px; bottom: 1px; width: 2.4rem; display: flex; align-items: center; justify-content: center; padding: 0; background: none; border: 0; color: inherit; opacity: .7; cursor: pointer; }
+.cb-arrow:hover { opacity: 1; }
+.cb-arrow svg { width: .8rem; height: .55rem; transition: transform .15s; }
+.cb-arrow[aria-expanded="true"] svg { transform: rotate(180deg); }
+.cb-list { position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 40; max-height: min(19rem, 55vh); overflow-y: auto; margin: 0; padding: .3rem 0; list-style: none;
+  background: var(--cb-bg, #fff); color: var(--cb-ink, #111); border: 1px solid var(--cb-line, #ccc); border-radius: var(--cb-radius, 6px); box-shadow: 0 10px 28px rgba(0, 0, 0, .2); }
+.cb-opt { display: flex; align-items: baseline; gap: .5rem; padding: .45rem .85rem; cursor: pointer; line-height: 1.35; }
+.cb-opt.is-active { background: var(--cb-hl, rgba(0, 0, 0, .06)); }
+.cb-opt.is-current { box-shadow: inset 3px 0 0 var(--cb-accent, currentColor); }
+.cb-opt.is-current .cb-name { font-weight: 700; }
+.cb-opt mark { background: none; color: inherit; font-weight: 800; text-decoration: underline; text-underline-offset: 3px; }
+.cb-en { font-size: .75rem; opacity: .6; }
+.cb-cnt { margin-left: auto; padding-left: .6rem; font-size: .75rem; opacity: .65; white-space: nowrap; }
+.cb-empty { padding: .5rem .85rem; opacity: .7; font-size: .88rem; }
+.dist-note { margin-top: 1rem; max-width: 46em; }
+/* 이념 → 가까운 국붕이 */
+.ir-link { background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer; text-decoration: underline dotted; text-underline-offset: 3px; text-align: inherit; }
+.ir-link:hover, .ir-link:focus-visible { text-decoration-style: solid; }
+.ip-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: .2rem .9rem; margin: .2rem 0 .8rem; max-width: none; }
+.ip-target { font-size: 1.3rem; font-weight: 800; }
+.ip-coords { font-size: .85rem; opacity: .75; }
+.ip-table .c-rank { width: 4.5rem; }
+.ip-table .c-d { width: 6rem; font-variant-numeric: tabular-nums; }
+.ip-table .c-own { width: 6.5rem; font-variant-numeric: tabular-nums; }
+.ip-row.is-own .c-own { font-weight: 700; }
+.ip-row.is-own .c-own::after { content: '판정'; margin-left: .35rem; font-size: .7rem; font-weight: 400; padding: .02rem .4rem; border: 1px solid currentColor; border-radius: 999px; opacity: .7; vertical-align: 1px; }
+.ip-row.is-mean td { font-style: italic; opacity: .75; }
+.ip-row.is-picked td { background: color-mix(in srgb, currentColor 9%, transparent); }
+.ip-note { margin-top: .9rem; max-width: 46em; }
+.ip-target { color: var(--link); }
+.name-search { --cb-bg: var(--page); --cb-ink: var(--ink); --cb-line: var(--line); --cb-hl: var(--hl); --cb-accent: var(--link); --cb-radius: 0; }
+@media (max-width: 480px) { .ip-row.is-own .c-own::after { display: none; } .ip-table .c-own { width: 4rem; } }
+/* 가까운 이념 TOP 10 */
+.ir-pick { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .8rem; margin: 0 0 1rem; }
+.ir-pick label { font-weight: 700; font-size: .9rem; }
+.ir-pick select { font: inherit; padding: .45rem .7rem; min-width: 12rem; max-width: 100%; }
+.ir-table .c-rank { width: 4.5rem; }
+.ir-table .c-d { width: 7rem; font-variant-numeric: tabular-nums; }
+.ir-row.is-first .c-ideo-name { font-weight: 700; }
+.ir-row.is-first .c-ideo-name::after { content: '8values 판정'; margin-left: .5rem; font-size: .72rem; font-weight: 400; padding: .05rem .45rem; border: 1px solid currentColor; border-radius: 999px; opacity: .7; vertical-align: 1px; }
+.ir-note { margin-top: 1rem; max-width: 46em; }
+.ir-ref { margin-top: 1.4rem; }
+.ir-ref summary { cursor: pointer; font-weight: 700; padding: .3rem 0; }
+.ir-ref .tbl { margin-top: .7rem; }
+.ir-ref-table td { font-variant-numeric: tabular-nums; }
+.ir-ref-table tr:not(.has-count) td:last-child { opacity: .5; }
+/* 갤 평균 눈금자 */
+.ru-top { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+.ru-scale { position: relative; height: 3rem; }
+.ru-scale::before { content: ''; position: absolute; left: 0; right: 0; top: 1rem; height: 2px; margin-top: -1px; background: currentColor; opacity: .55; }
+.ru-scale::after { content: ''; position: absolute; left: 0; right: 0; top: .65rem; height: .7rem; background: repeating-linear-gradient(to right, currentColor 0 1px, transparent 1px 10%); opacity: .35; }
+.ru-pin { position: absolute; left: var(--pos); top: 1rem; width: 16px; height: 16px; border-radius: 50%; transform: translate(-50%, -50%); z-index: 1; }
+.ru-end { position: absolute; bottom: 0; white-space: nowrap; }
+.ru-l { left: 0; } .ru-r { right: 0; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* ---- 디자인별 스타일 ---- */
+/* 시안 4. 갤러리 게시판 — 게시글처럼 읽히는 집계 */
+:root {
+  --font: 'Nanum Gothic', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  --page: #ffffff; --bar: #3b4890; --bar-2: #29367c; --ink: #333333; --ink-2: #777777; --line: #cccccc; --line-2: #e6e6e6;
+  --link: #3b4890; --red: #d31900; --hl: #f3f5ff; --head: #f7f7f7; --notice: #fff8f6;
+  --heat-near: #b5dfbd; --heat-mid: #ffffff; --heat-far: #f5a3aa;
+  --lean-low: #93b8ff; --lean-mid: #ffffff; --lean-high: #f39a9a;
+  --ink-on-light: #222222; --ink-on-dark: #ffffff;
+  --chart-bar: #3b4890; --hist-leftist: #d31900; --chart-grid: #eeeeee; --chart-tick: #777777; --chart-gap: #ffffff; --chart-tip-bg: #333333; --chart-tip-fg: #ffffff;
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --page: #1e1f22; --bar: #2c3570; --bar-2: #222a5c; --ink: #dfe1e6; --ink-2: #9a9ea8; --line: #41444b; --line-2: #2f3136;
+  --link: #9eaaf0; --red: #ff6b57; --hl: #262a3a; --head: #26282c; --notice: #2c2321;
+  --heat-near: #2d5a37; --heat-mid: #1e1f22; --heat-far: #7c2b31;
+  --lean-low: #2c4f8f; --lean-mid: #1e1f22; --lean-high: #8a2e2e;
+  --ink-on-light: #1e1f22; --ink-on-dark: #eceef2;
+  --chart-bar: #9eaaf0; --hist-leftist: #ff6b57; --chart-grid: #2f3136; --chart-tick: #9a9ea8; --chart-gap: #1e1f22; --chart-tip-bg: #dfe1e6; --chart-tip-fg: #1e1f22;
+  color-scheme: dark;
+}
+body { background: var(--page); color: var(--ink); font-family: var(--font); font-size: 14px; line-height: 1.6; }
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+:focus-visible { outline: 2px solid var(--link); outline-offset: 1px; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 1rem; }
+
+/* 상단 바 */
+.gnb { background: var(--bar); color: #fff; border-bottom: 3px solid var(--bar-2); }
+.gnb .wrap { display: flex; align-items: center; gap: .8rem; min-height: 3.4rem; }
+.gnb h1 { margin: 0; white-space: nowrap; font-size: 1.35rem; font-weight: 800; letter-spacing: -.02em; }
+.gnb .tag { font-size: .75rem; border: 1px solid rgba(255,255,255,.55); padding: 0 .4rem; border-radius: 2px; }
+.night { margin-left: auto; white-space: nowrap; display: inline-flex; align-items: center; gap: .4rem; background: none; border: 0; color: #fff; font-size: .82rem; }
+.night i { width: 1.9rem; height: 1rem; border-radius: 1rem; background: rgba(255,255,255,.3); position: relative; }
+.night i::after { content: ''; position: absolute; top: .15rem; left: .15rem; width: .7rem; height: .7rem; border-radius: 50%; background: #fff; transition: left .15s; }
+.night[aria-pressed="true"] i { background: #7cdb8a; }
+.night[aria-pressed="true"] i::after { left: 1.05rem; }
+
+/* 게시판 탭 */
+.board-tabs { display: flex; gap: 0; margin: 1.2rem 0 0; border-bottom: 2px solid var(--bar); overflow-x: auto; scrollbar-width: none; }
+.board-tabs button { flex: none; background: var(--head); border: 1px solid var(--line); border-bottom: 0; margin-right: -1px; padding: .5rem 1rem; font-size: .9rem; color: var(--ink-2); }
+.board-tabs button:hover { color: var(--ink); }
+.board-tabs button.is-active { background: var(--bar); border-color: var(--bar); color: #fff; font-weight: 800; }
+
+/* 게시글 */
+.post-head { border-bottom: 1px solid var(--line); padding: 1rem .2rem .8rem; }
+.post-title { margin: 0; font-size: 1.25rem; font-weight: 800; }
+.post-title .prefix { color: var(--ink-2); font-weight: 700; margin-right: .3rem; }
+.post-title .reply { color: var(--red); font-size: 1rem; margin-left: .3rem; }
+.post-meta { display: flex; flex-wrap: wrap; gap: .4rem 0; margin-top: .4rem; font-size: .82rem; color: var(--ink-2); }
+.post-meta span:not(:last-child)::after { content: '|'; margin: 0 .55rem; color: var(--line); }
+.post-meta b { color: var(--ink); }
+main.wrap { padding-bottom: 3rem; scroll-margin-top: .5rem; }
+.post-body { padding: 1.4rem .2rem 0; }
+.post-body > p { max-width: 44em; }
+h2.sub { font-size: 1.02rem; font-weight: 800; margin: 2rem 0 .6rem; padding-left: .5rem; border-left: 3px solid var(--bar); line-height: 1.3; }
+.muted { color: var(--ink-2); font-size: .85rem; }
+
+/* 게시판 표 */
+.tbl-wrap { overflow-x: auto; }
+.tbl { width: 100%; border-top: 2px solid var(--bar); font-size: .88rem; }
+.tbl th, .tbl td { padding: .5rem .6rem; text-align: center; border-bottom: 1px solid var(--line-2); }
+.tbl thead th { background: var(--head); font-weight: 700; border-bottom: 1px solid var(--line); }
+.tbl tbody tr:hover { background: var(--hl); }
+.tbl .c-name { font-weight: 700; }
+.c-ideo { color: var(--ink-2); font-size: .82rem; }
+.c-ideo::before { content: '['; } .c-ideo::after { content: ']'; }
+.c-ideo:empty::before, .c-ideo:empty::after { content: ''; }
+
+/* 정보 박스 */
+.info { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--line); margin: 1rem 0 0; }
+.info div { padding: .8rem 1rem; border-right: 1px solid var(--line-2); }
+.info div:last-child { border-right: 0; }
+.info dt { font-size: .8rem; color: var(--ink-2); }
+.info dd { margin: .1rem 0 0; font-size: 1.15rem; font-weight: 800; }
+.info dd em { font-style: normal; color: var(--red); font-size: .9rem; margin-left: .2rem; }
+.attach { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .8rem; }
+.attach figure { margin: 0; border: 1px solid var(--line); padding: .6rem .7rem .4rem; }
+.attach figcaption { font-size: .82rem; color: var(--ink-2); margin-bottom: .3rem; }
+.attach figcaption b { color: var(--ink); }
+.go-list { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: 1rem; }
+.go-list button { background: var(--page); border: 1px solid var(--line); padding: .35rem .8rem; font-size: .85rem; }
+.go-list button:hover { border-color: var(--bar); color: var(--link); }
+
+/* 이념: 말머리 목록 */
+.ideo-board { border-top: 2px solid var(--bar); }
+.ideo-cols, .ideo-row { display: grid; grid-template-columns: 12.5rem 5rem minmax(0, 1fr); align-items: center; column-gap: 1rem; padding: .55rem .6rem; border-bottom: 1px solid var(--line-2); }
+.ideo-cols { background: var(--head); font-weight: 700; font-size: .85rem; border-bottom-color: var(--line); }
+.ideo-list { list-style: none; margin: 0; padding: 0; }
+.ideo-row:hover { background: var(--hl); }
+.ideo-head { display: contents; }
+.ideo-name { font-weight: 800; color: var(--link); }
+.ideo-name::before { content: '['; color: var(--ink-2); font-weight: 400; } .ideo-name::after { content: ']'; color: var(--ink-2); font-weight: 400; }
+.ideo-count { font-size: .85rem; color: var(--ink-2); }
+.ideo-count b { color: var(--red); font-size: .95rem; }
+.ideo-count small { display: block; font-size: .75rem; }
+.ideo-track { height: .55rem; background: var(--line-2); }
+.ideo-fill { background: var(--bar); }
+:root[data-theme="dark"] .ideo-fill { background: var(--link); }
+.ideo-members { display: flex; flex-wrap: wrap; gap: .15rem .7rem; font-size: .85rem; }
+.ideo-chip.is-auto { color: var(--ink-2); }
+.ideo-chip.is-auto::after { content: '*'; color: var(--red); }
+.ideo-party { color: var(--red); font-weight: 700; }
+.ideo-row:first-child .ideo-name::after { content: '] 최다'; }
+.ideo-row.is-empty { background: var(--head); }
+.ideo-row.is-empty .ideo-name { color: var(--ink-2); }
+
+/* 거리 */
+.mx-wrap { max-height: 520px; overflow: auto; border-top: 2px solid var(--bar); border-bottom: 1px solid var(--line); }
+.mx-table { width: max-content; font-size: .76rem; }
+.mx-table th, .mx-table td { padding: .4rem .3rem; border: 1px solid var(--line-2); }
+.mx-table thead th { position: sticky; top: 0; z-index: 2; background: var(--head); }
+.mx-table .mx-row { position: sticky; left: 0; z-index: 1; background: var(--head); }
+.mx-table .mx-corner { position: sticky; left: 0; top: 0; z-index: 3; background: var(--head); }
+.mx-head:hover { color: var(--link); text-decoration: underline; }
+.mx-foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; margin-top: .8rem; }
+.btn { background: var(--bar); color: #fff; border: 1px solid var(--bar-2); padding: .4rem .9rem; font-size: .85rem; font-weight: 700; }
+.btn.plain { background: var(--page); color: var(--ink); border-color: var(--line); }
+.legend { display: flex; align-items: center; gap: .5rem; font-size: .78rem; color: var(--ink-2); }
+.legend-bar { width: 10rem; height: .6rem; background: linear-gradient(to right, var(--heat-near), var(--heat-mid), var(--heat-far)); border: 1px solid var(--line); }
+.detail-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .8rem; margin-bottom: .7rem; }
+.detail-head h2 { margin: 0; font-size: 1.1rem; font-weight: 800; }
+#detail-target-name { color: var(--link); }
+.detail-ideo { margin-left: .4rem; color: var(--ink-2); font-size: .85rem; font-weight: 400; }
+
+/* 좌파력 */
+.l-row .c-name { text-align: left; }
+.l-row.is-top .c-rank { color: var(--red); font-weight: 800; }
+.l-row.is-top .c-name::after { content: '1위'; margin-left: .4rem; font-size: .7rem; color: #fff; background: var(--red); padding: .05rem .3rem; border-radius: 2px; vertical-align: 1px; }
+.l-row.is-mean { background: var(--notice); }
+.l-row.is-mean td { color: var(--ink-2); }
+.l-badge { display: inline-block; min-width: 4.4rem; padding: .05rem .4rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.estimate { border: 1px solid var(--line); padding: .9rem 1rem; margin: 1.6rem 0; }
+.estimate h3 { margin: 0 0 .3rem; font-size: .95rem; }
+.c-est strong { color: var(--link); }
+.c-est span { color: var(--ink-2); font-size: .78rem; }
+
+/* 정당 */
+.notice-row { display: flex; gap: .7rem; align-items: flex-start; background: var(--notice); border: 1px solid var(--line-2); padding: .7rem .9rem; margin-bottom: 1rem; font-size: .86rem; }
+.notice-row b { flex: none; background: var(--red); color: #fff; font-size: .75rem; padding: .05rem .4rem; border-radius: 2px; margin-top: .15rem; }
+#party-distance-table .p-user { text-align: left; white-space: nowrap; }
+#party-distance-table .p-cell.is-min { color: var(--red); font-weight: 800; background: var(--notice); }
+#party-distance-table tr.is-mean > * { background: var(--hl); }
+
+footer { border-top: 1px solid var(--line); color: var(--ink-2); font-size: .78rem; text-align: center; padding: 1rem; }
+/* 분기 이동: 게시판 페이지 번호처럼 */
+.q-nav { margin-top: 2.2rem; padding: 1.1rem 1rem 1.4rem; border-top: 2px solid var(--bar); text-align: center; }
+.q-head { font-size: .8rem; color: var(--ink-2); margin-bottom: .6rem; }
+.q-pages { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .35rem; }
+.q-pages a, .q-pages strong { display: inline-flex; align-items: center; justify-content: center; min-width: 3.4rem; height: 2rem; padding: 0 .6rem; border: 1px solid var(--line); font-size: .86rem; text-decoration: none; }
+.q-pages a { color: var(--link); background: var(--page); }
+.q-pages a:hover { border-color: var(--bar); text-decoration: none; }
+.q-pages strong { background: var(--bar); border-color: var(--bar); color: #fff; }
+.q-pages .q-year { font-size: .8rem; font-weight: 700; color: var(--ink-2); margin: 0 .15rem 0 .5rem; }
+.q-pages .q-year:first-of-type { margin-left: 0; }
+.q-pages .q-step { color: var(--ink); }
+.q-pages .q-off { visibility: hidden; }
+@media (max-width: 520px) {
+  .q-pages .q-step { order: 9; flex: 1 1 40%; }
+  .q-pages .q-step.q-prev { order: 8; }
+  .q-pages .q-break { flex-basis: 100%; height: 0; order: 7; }
+}
+
+/* 전체 보기 창 */
+.modal { background: rgba(0, 0, 0, .75); }
+.modal-sheet { background: var(--page); border: 1px solid var(--line); padding: .9rem 1rem; }
+.modal-head h3 { font-size: 1rem; }
+.zbtn { background: var(--page); border: 1px solid var(--line); color: var(--ink); }
+.zbtn:hover { border-color: var(--bar); color: var(--link); }
+.zoom-stage { border-top: 2px solid var(--bar); border-bottom: 1px solid var(--line); }
+/* 검색, 상관계수 */
+.ns-row input { background: var(--page); color: var(--ink); border: 1px solid var(--line); }
+.ns-btn { background: var(--bar); color: #fff; border: 1px solid var(--bar-2); }
+.ns-hit { background: var(--page); border: 1px solid var(--line); color: var(--link); }
+.corr-list { border-top: 2px solid var(--bar); }
+.corr-item { border-bottom: 1px solid var(--line-2); padding-left: .6rem; padding-right: .6rem; }
+.corr-r { font-weight: 800; font-size: 1.35rem; }
+.corr-item[data-sign="pos"] .corr-r { color: var(--red); }
+.corr-item[data-sign="neg"] .corr-r { color: var(--link); }
+.corr-note { border: 1px solid var(--line); padding: .9rem 1rem .5rem; }
+.ir-pick select { background: var(--page); color: var(--ink); border: 1px solid var(--line); }
+.ir-row.is-first td { background: var(--hl); }
+.ir-ref summary { color: var(--link); }
+@media (max-width: 720px) {
+  .gnb h1 { font-size: 1.12rem; }
+  .gnb .tag { display: none; }
+  .info { grid-template-columns: 1fr; }
+  .info div { border-right: 0; border-bottom: 1px solid var(--line-2); }
+  .attach { grid-template-columns: 1fr; }
+  .ideo-cols { display: none; }
+  .ideo-row { grid-template-columns: 1fr auto; row-gap: .35rem; }
+  .ideo-track { grid-column: 1 / -1; }
+  .ideo-members { grid-column: 1 / -1; }
+  .ideo-count small { display: inline; margin-left: .3rem; }
+}
+</style>
+</head>
+<body>
+<header class="gnb">
+  <div class="wrap">
+    <h1>국민의 정부 갤러리</h1>
+    <span class="tag">8values 집계</span>
+    <button class="night" type="button" data-theme-toggle data-label-light="야간 모드" data-label-dark="야간 모드" aria-pressed="false"><span data-theme-label>야간 모드</span><i aria-hidden="true"></i></button>
+  </div>
+</header>
+
+<main class="wrap" data-tab-anchor>
+  <nav class="board-tabs" role="tablist" aria-label="집계 항목">
+    <button type="button" role="tab" data-tab="main">본문</button>
+    <button type="button" role="tab" data-tab="ideology">이념 분포</button>
+    <button type="button" role="tab" data-tab="irank">가까운 이념</button>
+    <button type="button" role="tab" data-tab="distance">성향 거리</button>
+    <button type="button" role="tab" data-tab="leftist">좌파력</button>
+    <button type="button" role="tab" data-tab="party">정당과의 거리</button>
+    <button type="button" role="tab" data-tab="corr">상관계수</button>
+  </nav>
+  <div class="post-head">
+    <h2 class="post-title"><span class="prefix">[집계]</span>2026년 1분기 국붕갤 8values 종합<span class="reply">[34]</span></h2>
+    <div class="post-meta"><span>글쓴이 <b>8values 집계</b></span><span>2026년 1분기</span><span>참여 34명</span><span>이념 9종</span></div>
+  </div>
+
+  <!-- 본문 -->
+  <section id="panel-main" class="tab-panel post-body" role="tabpanel">
+    <p>2026년 1분기 국민의 정부 갤러리 이용자들의 8values 정치 성향 테스트 결과를 모았습니다. 위 탭이나 아래 버튼으로 항목별 결과를 볼 수 있습니다.</p>
+    <dl class="info">
+      <div><dt>참여한 국붕이</dt><dd>34명</dd></div>
+      <div><dt>가장 많은 이념</dt><dd>민주사회주의<em>[10]</em></dd></div>
+      <div><dt>갤 평균 판정 이념</dt><dd>민주사회주의</dd></div>
+    </dl>
+    <div class="go-list">
+      <button type="button" data-goto="ideology">이념 분포 보기</button>
+      <button type="button" data-goto="irank">가까운 이념 보기</button>
+      <button type="button" data-goto="distance">성향 거리 보기</button>
+      <button type="button" data-goto="leftist">좌파력 순위 보기</button>
+      <button type="button" data-goto="party">정당과의 거리 보기</button>
+      <button type="button" data-goto="corr">상관계수 보기</button>
+    </div>
+
+    <h2 class="sub">갤러리 평균 8values</h2>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th scope="col">구분</th><th scope="col">경제(평등)</th><th scope="col">외교(국가)</th><th scope="col">시민(자유)</th><th scope="col">사회(전통)</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">갤 평균</th><td>68.72</td><td>49.34</td><td>52.98</td><td>33.37</td></tr>
+          <tr><th scope="row">성향</th><td class="muted" data-tier="econ"></td><td class="muted" data-tier="dipl"></td><td class="muted" data-tier="civil"></td><td class="muted" data-tier="soc"></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="text-align:right;max-width:none;margin:.5rem 0 0"><a href="https://8values-ko.github.io/results.html?e=68.7&d=50.7&g=53.0&s=66.6" target="_blank" rel="noopener">평균 8values 결과 페이지 열기</a></p>
+
+  </section>
+
+  <!-- 이념 분포 -->
+  <section id="panel-ideology" class="tab-panel post-body" role="tabpanel">
+    <p class="muted">판정 이념을 말머리처럼 묶어 인원만 셌습니다.</p>
+    <div class="ideo-board">
+      <div class="ideo-cols" aria-hidden="true"><span>말머리</span><span>인원</span><span>비율</span></div>
+      <ul id="ideology-list" class="ideo-list"></ul>
+    </div>
+    <h2 class="sub">축별 성향 분포</h2>
+    <div class="attach">
+      <figure><figcaption><b>경제(평등)</b> 분포</figcaption><div class="chart-box"><canvas id="chartEconomy"></canvas></div></figure>
+      <figure><figcaption><b>외교(국가)</b> 분포</figcaption><div class="chart-box"><canvas id="chartDiplomacy"></canvas></div></figure>
+      <figure><figcaption><b>시민(자유)</b> 분포</figcaption><div class="chart-box"><canvas id="chartCivil"></canvas></div></figure>
+      <figure><figcaption><b>사회(전통)</b> 분포</figcaption><div class="chart-box"><canvas id="chartSociety"></canvas></div></figure>
+    </div>
+  </section>
+
+  <!-- 가까운 이념 -->
+  <section id="panel-irank" class="tab-panel post-body" role="tabpanel">
+    <p class="muted">닉네임을 고르면 가까운 이념 10개를, 이념을 고르면 그 이념과 가까운 순서로 국붕이 전원을 보여 줍니다. 거리는 8values가 이념마다 정해 둔 대표 좌표까지 잰 값이고, 닉네임별 1위는 8values 결과 화면의 '가장 가까운 이념'과 같습니다.</p>
+    <h2 class="sub">가까운 이념 TOP 10</h2>
+    <div class="ir-pick"><label for="ir-select">기준 닉네임</label><select id="ir-select"></select></div>
+    <div class="tbl-wrap"><table class="tbl ir-table" id="ir-table"><thead><tr><th scope="col">순위</th><th scope="col">이념</th><th scope="col">거리</th></tr></thead><tbody id="ir-body"></tbody></table></div>
+    <div class="foot-btns" style="justify-content:flex-end;margin-top:.6rem"><button type="button" class="btn plain" data-save-table="#ir-table" data-title="ir"><span>이미지로 저장</span></button></div>
+    <div class="ip-block" id="ip-block">
+    <h2 class="sub">이념별 가까운 국붕이</h2>
+      <form class="name-search ip-search" id="ip-search" role="search" autocomplete="off">
+        <label for="ip-input" id="ip-label">이념 이름으로 찾기</label>
+        <div class="ns-row">
+          <div class="cb-field">
+            <input id="ip-input" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="ip-options" placeholder="이념 이름 일부 (예: 사회민주)" enterkeyhint="search" autocomplete="off" spellcheck="false">
+            <button type="button" class="cb-arrow" id="ip-arrow" tabindex="-1" aria-label="이념 전체 목록 열기" aria-controls="ip-options" aria-expanded="false"><svg viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1.5 6 6.5 11 1.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <ul class="cb-list" id="ip-options" role="listbox" aria-labelledby="ip-label" hidden></ul>
+          </div>
+          <button type="submit" class="ns-btn">찾기</button>
+        </div>
+        <p class="ns-msg" id="ip-msg" aria-live="polite"></p>
+      </form>
+      <p class="ip-head"><span class="ip-target" id="ip-target"></span><span class="ip-coords" id="ip-coords"></span></p>
+      <div class="tbl-wrap"><table class="tbl ip-table" id="ip-table"><thead><tr><th scope="col">순위</th><th scope="col">닉네임</th><th scope="col">거리</th><th scope="col">본인 기준</th></tr></thead><tbody id="ip-body"></tbody></table></div>
+      <div class="foot-btns" style="justify-content:flex-end;margin-top:.6rem"><button type="button" class="btn plain" data-save-table="#ip-table" data-title="ip"><span>이미지로 저장</span></button></div>
+      <p class="muted ip-note">'본인 기준'은 그 사람에게 이 이념이 전체 이념 중 몇 번째로 가까운지입니다. 1위인 사람은 8values 결과 화면에서 이 이념으로 판정된 사람이에요. 위 표의 이념 이름이나 이 표의 닉네임을 누르면 서로 오갈 수 있어요.</p>
+    </div>
+    <p class="muted ir-note">거리는 성향 거리·정당과의 거리 탭과 같은 8values 식입니다(경제·시민 축은 차이를 제곱, 외교·사회 축은 1.74제곱해 더한 뒤 제곱근). 그래서 이념을 가를 때도 같은 점수 차라면 경제·시민 축 차이가 더 크게 작용합니다. 이념 좌표는 8values가 이념마다 하나씩 정해 둔 기준점(엑셀 '이념 대표값' 시트에 출처와 함께 정리)이고, 8values도 이념 판정은 축 점수보다 부정확하다고 밝히고 있습니다.</p>
+    <details class="ir-ref"><summary>이념 대표값 전체 보기 (52개)</summary><div class="tbl-wrap"><table class="tbl ir-ref-table" id="ir-ref-table"></table></div></details>
+  </section>
+
+  <!-- 성향 거리 -->
+  <section id="panel-distance" class="tab-panel post-body" role="tabpanel">
+    <form class="name-search" id="name-search" role="search" autocomplete="off">
+      <label for="name-search-input" id="name-search-label">닉네임으로 찾기</label>
+      <div class="ns-row">
+        <div class="cb-field">
+          <input id="name-search-input" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="name-search-options" placeholder="닉네임 일부만 입력해도 돼요" enterkeyhint="search" autocomplete="off" spellcheck="false">
+          <button type="button" class="cb-arrow" id="name-search-arrow" tabindex="-1" aria-label="닉네임 전체 목록 열기" aria-controls="name-search-options" aria-expanded="false"><svg viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1.5 6 6.5 11 1.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <ul class="cb-list" id="name-search-options" role="listbox" aria-labelledby="name-search-label" hidden></ul>
+        </div>
+        <button type="submit" class="ns-btn">찾기</button>
+      </div>
+      <p class="ns-msg" id="name-search-msg" aria-live="polite"></p>
+    </form>
+    <div id="distance-matrix-view">
+      <p class="muted">닉네임을 누르면 그 국붕이 기준으로 가까운 순위를 볼 수 있습니다. 표는 가로와 세로로 스크롤됩니다.</p>
+      <div class="mx-wrap"><table class="mx-table" id="distance-table"></table></div>
+      <div class="mx-foot">
+        <div class="foot-btns"><button type="button" class="btn" data-action="full-table">표 전체 보기</button><button type="button" class="btn plain" data-save-table="#distance-table" data-title="성향 거리 행렬"><span>이미지로 저장</span></button></div>
+        <div class="legend"><span>가까움</span><div class="legend-bar"></div><span>멂</span></div>
+      </div>
+      <p class="muted dist-note">거리는 8values가 '가장 가까운 이념'을 고를 때 쓰는 식을 그대로 씁니다. 네 축의 점수 차이 중 경제·시민 축은 제곱하고 외교·사회 축은 1.74제곱해 모두 더한 뒤 제곱근을 씌웁니다. 그래서 같은 20점 차이라도 경제·시민 축은 400, 외교·사회 축은 약 183만큼 더해져 경제·시민 축 차이가 거리에 더 크게 반영됩니다. 정당과의 거리, 좌파력, 가까운 이념도 모두 같은 식입니다.</p>
+    </div>
+    <div id="distance-detail-view" hidden>
+      <div class="detail-head">
+        <h2><span id="detail-target-name"></span><span id="detail-target-suffix"></span></h2>
+        <div class="foot-btns"><button type="button" class="btn plain" data-save-table="#detail-table-body" data-title="detail"><span>이미지로 저장</span></button><button type="button" class="btn plain" data-action="back-to-matrix">목록으로</button></div>
+      </div>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th scope="col">순위</th><th scope="col">닉네임</th><th scope="col">거리</th></tr></thead><tbody id="detail-table-body"></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- 좌파력 -->
+  <section id="panel-leftist" class="tab-panel post-body" role="tabpanel">
+    <p class="muted leftist-note">좌파력은 네 축 점수가 극좌(100)와 극우(0) 사이 어디쯤에 있는지 나타내는 비율이에요. 극우 예시(평등 0, 국가 100, 자유 0, 전통 100)와 극좌 예시(평등 100, 국가 0, 자유 100, 전통 0)까지의 거리를 성향 거리와 같은 8values 식으로 각각 잰 뒤, 극우와의 거리 ÷ (극우와의 거리 + 극좌와의 거리) × 100으로 계산합니다. 양쪽과의 거리가 같으면 50이고, 극좌에 가까울수록 100에 가까워져요.</p>
+    <dl class="info" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:.8rem">
+      <div><dt>평균 좌파력</dt><dd>59.69</dd></div>
+      <div><dt>표준편차</dt><dd>7.98</dd></div>
+    </dl>
+    <h2 class="sub">좌파력 순위</h2>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th scope="col" style="width:4.5rem">순위</th><th scope="col" style="text-align:left">닉네임</th><th scope="col" style="width:9rem">좌파력 (0~100)</th></tr></thead><tbody id="leftist-table-body"></tbody></table></div>
+    <div class="foot-btns" style="justify-content:flex-end;margin-top:.7rem"><button type="button" class="btn plain" data-save-table="#leftist-table-body" data-title="좌파력 순위"><span>이미지로 저장</span></button></div>
+    <div class="estimate">
+      <h3>1,000명 기준 예상 등수</h3>
+      <p class="muted">갤러리 평균(59.69)과 표준편차(7.98)를 따르는 정규분포를 가정했을 때, 같은 성향의 국붕이가 1,000명 있다면 몇 등일지 계산한 값입니다. (소수점 반올림)</p>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th scope="col">닉네임</th><th scope="col">예상 등수</th></tr></thead><tbody id="estimated-rank-table-body"></tbody></table></div>
+    </div>
+    <div class="attach" style="grid-template-columns:1fr">
+      <figure><figcaption><b>좌파력</b> 분포</figcaption><div class="chart-box" style="height:18rem"><canvas id="chartLeftist"></canvas></div></figure>
+    </div>
+  </section>
+
+  <!-- 정당 -->
+  <section id="panel-party" class="tab-panel post-body" role="tabpanel">
+    <div class="notice-row"><b>공지</b><span>각 정당의 8values 수치는 공식 데이터가 아니며, AI(Gemini)가 추측한 응답으로 검사한 임의의 결과입니다. 실제 정당의 성향을 정확히 반영하지 않으므로 참고용으로만 봐 주세요.</span></div>
+    <div class="tbl-wrap"><table class="tbl" id="party-distance-table"></table></div>
+    <p class="muted" style="margin-top:.6rem">빨간 굵은 글씨가 각 행에서 가장 가까운 정당입니다. 거리는 성향 거리 탭과 같은 8values 식으로 쟀습니다.</p>
+    <div class="foot-btns" style="justify-content:flex-end;margin-top:.5rem"><button type="button" class="btn plain" data-save-table="#party-distance-table" data-title="정당과의 거리"><span>이미지로 저장</span></button></div>
+  </section>
+  <!-- 상관계수 -->
+  <section id="panel-corr" class="tab-panel post-body" role="tabpanel">
+    <p class="muted">네 축 점수가 서로 얼마나 함께 움직이는지 본 값입니다. 관계가 뚜렷한 쌍부터 적었습니다.</p>
+    <h2 class="sub">관계가 뚜렷한 순서</h2>
+    <ol id="corr-list" class="corr-list"></ol>
+    <h2 class="sub">상관계수 표</h2>
+    <div class="tbl-wrap"><table class="tbl corr-table" id="corr-table"></table></div>
+    <div class="corr-foot"><button type="button" class="btn plain" data-save-table="#corr-table" data-title="축 사이 상관계수"><span>이미지로 저장</span></button></div>
+    <div class="corr-note" id="corr-note"></div>
+  </section>
+</main>
+
+<nav class="q-nav wrap" aria-label="분기 이동">
+  <div class="q-head">분기 이동</div>
+  <div class="q-pages" id="q-pages" data-current="2026-1"></div>
+</nav>
+
+<footer>국민의 정부 갤러리 | 8values 분기 집계</footer>
+
+<div id="full-table-modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="full-title">
+  <div class="modal-sheet">
+    <div class="modal-head">
+      <h3 id="full-title">성향 거리 전체 보기</h3>
+      <div class="zoom-tools" role="group" aria-label="표 확대와 축소">
+        <button type="button" class="zbtn" data-zoom="out" aria-label="축소">−</button>
+        <span class="zoom-level" id="zoom-level" aria-live="polite">100%</span>
+        <button type="button" class="zbtn" data-zoom="in" aria-label="확대">+</button>
+        <button type="button" class="zbtn" data-zoom="fit">한눈에</button>
+        <button type="button" class="zbtn" data-zoom="actual">원래 크기</button>
+        <button type="button" class="zbtn" data-save-table="#distance-table" data-title="성향 거리 행렬"><span>이미지로 저장</span></button>
+      </div>
+      <button type="button" class="btn" data-action="close-full"><span>닫기</span></button>
+    </div>
+    <div class="zoom-stage" id="full-table-stage"><div class="zoom-sizer" id="full-table-container"></div></div>
+    <p class="zoom-hint">Ctrl+휠이나 두 손가락으로 확대·축소하고, 끌어서 옮길 수 있어요. 닉네임을 누르면 그 사람 기준 순위로 이동합니다.</p>
+  </div>
+</div>
+
+<script>window.QUARTERS_BAKED = [{"file": "2026-1.html", "label": "2026년 1분기", "year": 2026, "q": 1}, {"file": "2026-2.html", "label": "2026년 2분기", "year": 2026, "q": 2}, {"file": "2026-3.html", "label": "2026년 3분기", "year": 2026, "q": 3}, {"file": "2026-4.html", "label": "2026년 4분기", "year": 2026, "q": 4}];</script>
+<script src="quarters.js"></script>
+<script>
+/* ============================================================
+   공통 동작 코드 (다섯 템플릿이 모두 같은 코드를 씁니다)
+   - 데이터는 main.py 가 Jinja 로 채워 넣습니다.
+   - 색은 전부 CSS 변수에서 읽어 오므로, 라이트/다크 전환 시 다시 칠합니다.
+   ============================================================ */
+const D = {
+  names: ["갤 평균", "이치카", "냐뤼링", "지로", "유이", "토루", "어준", "징어", "우지챠", "황금", "독변", "환난", "렝게", "삼각", "시은", "블봇", "케팔", "먕먕이", "트리거", "올슨", "두한", "정리좀", "와구와구", "보스", "내오살", "대국", "앙코", "아루", "오리", "토와", "펩제라", "핵뿜", "규라", "히나", "백합"],
+  matrix: [[0.0, 7.11, 6.08, 36.98, 14.73, 6.51, 7.3, 12.19, 8.42, 22.54, 11.68, 24.08, 9.09, 12.57, 41.97, 12.02, 12.52, 8.34, 24.9, 6.37, 11.62, 26.34, 10.22, 6.55, 17.4, 27.43, 26.58, 24.32, 17.77, 11.0, 10.31, 17.48, 7.7, 7.8, 41.64], [7.11, 0.0, 8.91, 36.13, 19.66, 7.27, 6.16, 9.37, 7.52, 25.54, 15.56, 29.36, 6.55, 13.63, 39.56, 7.98, 15.08, 12.56, 27.8, 3.67, 16.83, 22.86, 11.98, 9.41, 23.19, 25.77, 26.16, 24.55, 17.22, 12.09, 14.37, 22.0, 6.29, 11.42, 44.52], [6.08, 8.91, 0.0, 35.5, 13.31, 7.26, 6.11, 11.67, 7.25, 20.16, 12.35, 25.02, 12.4, 13.92, 45.64, 13.15, 7.52, 10.71, 25.63, 7.75, 14.4, 29.93, 8.01, 1.16, 17.27, 30.8, 24.05, 23.45, 20.54, 14.12, 10.08, 18.46, 8.24, 9.7, 42.89], [36.98, 36.13, 35.5, 0.0, 34.21, 36.77, 32.11, 34.08, 32.54, 29.05, 31.3, 53.77, 36.48, 29.51, 66.8, 31.22, 33.67, 33.65, 58.94, 34.0, 43.49, 53.73, 29.4, 36.07, 46.74, 57.72, 16.16, 16.71, 51.73, 46.23, 30.62, 49.75, 31.01, 41.65, 75.05], [14.73, 19.66, 13.31, 34.21, 0.0, 19.03, 15.58, 23.29, 18.16, 10.31, 8.12, 22.76, 22.59, 14.41, 55.84, 22.48, 11.22, 15.22, 29.62, 16.77, 17.91, 40.78, 10.31, 13.56, 16.2, 41.28, 22.83, 20.79, 30.88, 23.91, 7.65, 18.76, 16.39, 19.33, 45.13], [6.51, 7.27, 7.26, 36.77, 19.03, 0.0, 8.02, 6.88, 5.26, 26.04, 16.16, 27.95, 6.83, 16.05, 39.65, 9.69, 13.84, 9.57, 27.34, 8.32, 14.43, 24.54, 12.67, 7.39, 20.52, 25.6, 27.31, 25.82, 17.05, 11.55, 13.85, 22.02, 8.16, 7.16, 44.14], [7.3, 6.16, 6.11, 32.11, 15.58, 8.02, 0.0, 9.5, 5.32, 20.52, 12.43, 29.14, 9.98, 11.86, 44.57, 8.62, 10.31, 10.81, 29.64, 4.54, 17.28, 28.52, 6.6, 6.84, 21.98, 30.89, 21.46, 20.45, 21.9, 15.97, 10.37, 22.38, 4.02, 12.7, 46.68], [12.19, 9.37, 11.67, 34.08, 23.29, 6.88, 9.5, 0.0, 5.35, 28.4, 19.88, 33.99, 7.89, 18.46, 39.34, 6.79, 16.61, 13.02, 32.95, 10.82, 20.06, 24.74, 14.7, 11.91, 26.39, 27.04, 26.08, 25.22, 20.58, 16.51, 17.31, 28.18, 9.24, 13.01, 49.61], [8.42, 7.52, 7.25, 32.54, 18.16, 5.26, 5.32, 5.35, 0.0, 23.56, 15.07, 30.54, 8.2, 14.54, 42.48, 7.08, 12.41, 9.59, 30.99, 7.46, 17.23, 27.39, 9.79, 7.77, 22.83, 29.31, 23.34, 22.1, 21.32, 15.8, 12.35, 24.63, 5.34, 11.42, 47.89], [22.54, 25.54, 20.16, 29.05, 10.31, 26.04, 20.52, 28.4, 23.56, 0.0, 13.26, 30.55, 28.97, 17.58, 63.11, 26.72, 15.65, 22.17, 37.73, 22.22, 26.67, 47.72, 14.22, 20.49, 24.72, 49.16, 18.04, 16.86, 39.03, 32.2, 13.75, 26.98, 21.25, 27.67, 52.82], [11.68, 15.56, 12.35, 31.3, 8.12, 16.16, 12.43, 19.88, 15.07, 13.26, 0.0, 25.22, 17.84, 7.41, 51.14, 17.37, 13.33, 11.63, 31.02, 12.27, 16.62, 36.05, 8.23, 12.93, 19.2, 37.55, 21.47, 16.83, 28.31, 21.45, 4.64, 20.51, 11.75, 17.55, 46.68], [24.08, 29.36, 25.02, 53.77, 22.76, 27.95, 29.14, 33.99, 30.54, 30.55, 25.22, 0.0, 31.38, 29.24, 51.29, 34.82, 26.14, 26.28, 17.77, 28.43, 16.18, 40.74, 28.14, 24.74, 11.28, 36.62, 42.46, 39.92, 27.87, 23.75, 25.85, 12.13, 30.12, 22.92, 25.7], [9.09, 6.55, 12.4, 36.48, 22.59, 6.83, 9.98, 7.89, 8.2, 28.97, 17.84, 31.38, 0.0, 15.85, 35.87, 6.61, 18.94, 11.09, 30.58, 8.49, 16.87, 20.5, 15.27, 12.86, 25.08, 23.35, 28.6, 25.87, 17.12, 12.72, 16.26, 25.3, 8.38, 11.31, 46.64], [12.57, 13.63, 13.92, 29.51, 14.41, 16.05, 11.86, 18.46, 14.54, 17.58, 7.41, 29.24, 15.85, 0.0, 48.38, 14.58, 16.36, 13.3, 33.17, 10.61, 19.12, 33.02, 10.21, 14.63, 23.85, 35.68, 21.42, 14.83, 27.49, 21.32, 9.5, 23.67, 10.37, 18.78, 48.84], [41.97, 39.56, 45.64, 66.8, 55.84, 39.65, 44.57, 39.34, 42.48, 63.11, 51.14, 51.29, 35.87, 48.38, 0.0, 39.83, 52.22, 43.22, 46.58, 42.38, 41.0, 19.94, 50.11, 45.72, 50.3, 17.75, 61.88, 58.44, 30.1, 34.79, 50.48, 48.94, 43.48, 38.97, 52.49], [12.02, 7.98, 13.15, 31.22, 22.48, 9.69, 8.62, 6.79, 7.08, 26.72, 17.37, 34.82, 6.61, 14.58, 39.83, 0.0, 18.11, 12.35, 34.97, 8.42, 20.68, 24.75, 13.24, 13.76, 27.97, 28.46, 24.08, 21.55, 22.58, 18.09, 15.52, 28.79, 6.29, 15.58, 51.35], [12.52, 15.08, 7.52, 33.67, 11.22, 13.84, 10.31, 16.61, 12.41, 15.65, 13.33, 26.14, 18.94, 16.36, 52.22, 18.11, 0.0, 15.19, 27.96, 13.22, 18.81, 36.52, 8.17, 7.33, 17.96, 37.27, 20.84, 22.21, 26.55, 20.37, 11.09, 20.26, 13.01, 15.51, 45.07], [8.34, 12.56, 10.71, 33.65, 15.22, 9.57, 10.81, 13.02, 9.59, 22.17, 11.63, 26.28, 11.09, 13.3, 43.22, 12.35, 15.19, 0.0, 30.54, 11.27, 12.18, 29.73, 11.2, 11.22, 18.99, 30.38, 25.76, 21.76, 22.89, 16.48, 9.28, 22.41, 9.25, 10.95, 46.35], [24.9, 27.8, 25.63, 58.94, 29.62, 27.34, 29.64, 32.95, 30.99, 37.73, 31.02, 17.77, 30.58, 33.17, 46.58, 34.97, 27.96, 30.54, 0.0, 28.43, 21.64, 33.78, 31.46, 25.1, 18.01, 30.08, 46.01, 45.73, 19.77, 19.09, 31.25, 12.68, 31.46, 21.91, 19.78], [6.37, 3.67, 7.75, 34.0, 16.77, 8.32, 4.54, 10.82, 7.46, 22.22, 12.27, 28.43, 8.49, 10.61, 42.38, 8.42, 13.22, 11.27, 28.43, 0.0, 16.39, 25.93, 9.04, 8.43, 22.12, 28.67, 23.76, 21.69, 19.83, 14.03, 11.32, 21.31, 4.23, 12.27, 45.16], [11.62, 16.83, 14.4, 43.49, 17.91, 14.43, 17.28, 20.06, 17.23, 26.67, 16.62, 16.18, 16.87, 19.12, 41.0, 20.68, 18.81, 12.18, 21.64, 16.39, 0.0, 29.12, 18.15, 14.42, 11.59, 26.41, 33.92, 30.42, 18.62, 12.87, 16.05, 14.6, 17.23, 10.23, 35.61], [26.34, 22.86, 29.93, 53.73, 40.78, 24.54, 28.52, 24.74, 27.39, 47.72, 36.05, 40.74, 20.5, 33.02, 19.94, 24.75, 36.52, 29.73, 33.78, 25.93, 29.12, 0.0, 34.48, 30.05, 37.71, 10.18, 46.52, 44.2, 14.99, 19.22, 35.56, 34.61, 27.85, 24.57, 45.63], [10.22, 11.98, 8.01, 29.4, 10.31, 12.67, 6.6, 14.7, 9.79, 14.22, 8.23, 28.14, 15.27, 10.21, 50.11, 13.24, 8.17, 11.2, 31.46, 9.04, 18.15, 34.48, 0.0, 8.68, 20.79, 36.42, 18.25, 16.69, 27.01, 20.44, 5.71, 22.39, 7.53, 16.01, 48.17], [6.55, 9.41, 1.16, 36.07, 13.56, 7.39, 6.84, 11.91, 7.77, 20.49, 12.93, 24.74, 12.86, 14.63, 45.72, 13.76, 7.33, 11.22, 25.1, 8.43, 14.42, 30.05, 8.68, 0.0, 16.86, 30.74, 24.51, 24.11, 20.31, 14.02, 10.68, 18.22, 9.02, 9.42, 42.43], [17.4, 23.19, 17.27, 46.74, 16.2, 20.52, 21.98, 26.39, 22.83, 24.72, 19.2, 11.28, 25.08, 23.85, 50.3, 27.97, 17.96, 18.99, 18.01, 22.12, 11.59, 37.71, 20.79, 16.86, 0.0, 34.67, 35.33, 33.67, 24.62, 19.29, 18.74, 11.27, 23.13, 15.65, 32.27], [27.43, 25.77, 30.8, 57.72, 41.28, 25.6, 30.89, 27.04, 29.31, 49.16, 37.55, 36.62, 23.35, 35.68, 17.75, 28.46, 37.27, 30.38, 30.08, 28.67, 26.41, 10.18, 36.42, 30.74, 34.67, 0.0, 49.88, 47.44, 13.14, 18.5, 36.91, 32.64, 30.55, 23.72, 39.79], [26.58, 26.16, 24.05, 16.16, 22.83, 27.31, 21.46, 26.08, 23.34, 18.04, 21.47, 42.46, 28.6, 21.42, 61.88, 24.08, 20.84, 25.76, 46.01, 23.76, 33.92, 46.52, 18.25, 24.51, 35.33, 49.88, 0.0, 14.49, 41.56, 35.78, 20.7, 37.19, 21.77, 31.56, 62.52], [24.32, 24.55, 23.45, 16.71, 20.79, 25.82, 20.45, 25.22, 22.1, 16.86, 16.83, 39.92, 25.87, 14.83, 58.44, 21.55, 22.21, 21.76, 45.73, 21.69, 30.42, 44.2, 16.69, 24.11, 33.67, 47.44, 14.49, 0.0, 40.17, 34.05, 17.16, 35.79, 19.26, 29.85, 61.42], [17.77, 17.22, 20.54, 51.73, 30.88, 17.05, 21.9, 20.58, 21.32, 39.03, 28.31, 27.87, 17.12, 27.49, 30.1, 22.58, 26.55, 22.89, 19.77, 19.83, 18.62, 14.99, 27.01, 20.31, 24.62, 13.14, 41.56, 40.17, 0.0, 7.24, 27.72, 21.42, 22.52, 13.89, 34.14], [11.0, 12.09, 14.12, 46.23, 23.91, 11.55, 15.97, 16.51, 15.8, 32.2, 21.45, 23.75, 12.72, 21.32, 34.79, 18.09, 20.37, 16.48, 19.09, 14.03, 12.87, 19.22, 20.44, 14.02, 19.29, 18.5, 35.78, 34.05, 7.24, 0.0, 20.8, 16.76, 16.64, 8.0, 35.2], [10.31, 14.37, 10.08, 30.62, 7.65, 13.85, 10.37, 17.31, 12.35, 13.75, 4.64, 25.85, 16.26, 9.5, 50.48, 15.52, 11.09, 9.28, 31.25, 11.32, 16.05, 35.56, 5.71, 10.68, 18.74, 36.91, 20.7, 17.16, 27.72, 20.8, 0.0, 21.28, 9.8, 15.9, 47.34], [17.48, 22.0, 18.46, 49.75, 18.76, 22.02, 22.38, 28.18, 24.63, 26.98, 20.51, 12.13, 25.3, 23.67, 48.94, 28.79, 20.26, 22.41, 12.68, 21.31, 14.6, 34.61, 22.39, 18.22, 11.27, 32.64, 37.19, 35.79, 21.42, 16.76, 21.28, 0.0, 23.95, 17.58, 28.16], [7.7, 6.29, 8.24, 31.01, 16.39, 8.16, 4.02, 9.24, 5.34, 21.25, 11.75, 30.12, 8.38, 10.37, 43.48, 6.29, 13.01, 9.25, 31.46, 4.23, 17.23, 27.85, 7.53, 9.02, 23.13, 30.55, 21.77, 19.26, 22.52, 16.64, 9.8, 23.95, 0.0, 13.24, 48.14], [7.8, 11.42, 9.7, 41.65, 19.33, 7.16, 12.7, 13.01, 11.42, 27.67, 17.55, 22.92, 11.31, 18.78, 38.97, 15.58, 15.51, 10.95, 21.91, 12.27, 10.23, 24.57, 16.01, 9.42, 15.65, 23.72, 31.56, 29.85, 13.89, 8.0, 15.9, 17.58, 13.24, 0.0, 38.53], [41.64, 44.52, 42.89, 75.05, 45.13, 44.14, 46.68, 49.61, 47.89, 52.82, 46.68, 25.7, 46.64, 48.84, 52.49, 51.35, 45.07, 46.35, 19.78, 45.16, 35.61, 45.63, 48.17, 42.43, 32.27, 39.79, 62.52, 61.42, 34.14, 35.2, 47.34, 28.16, 48.14, 38.53, 0.0]],
+  parties: ["더민주", "국민의힘", "조혁당", "진보당", "개혁신당", "정의당"],
+  partyMatrix: [[10.15, 35.41, 14.49, 33.4, 29.77, 30.35], [8.39, 33.57, 14.86, 35.07, 24.13, 31.39], [9.55, 36.94, 13.85, 31.13, 32.1, 28.08], [28.78, 66.4, 24.12, 17.89, 46.89, 15.31], [16.39, 48.02, 15.22, 24.23, 43.27, 22.8], [10.72, 33.24, 15.58, 35.05, 26.76, 31.76], [4.4, 38.11, 10.64, 29.75, 28.62, 26.2], [10.67, 34.67, 15.51, 34.92, 23.53, 31.26], [7.13, 36.99, 11.85, 31.31, 27.28, 27.86], [19.62, 55.75, 16.33, 16.39, 47.77, 15.62], [11.87, 46.07, 10.12, 24.46, 37.51, 22.22], [31.6, 42.85, 33.27, 44.48, 49.16, 43.31], [11.11, 33.21, 16.03, 36.84, 21.77, 33.29], [10.28, 44.96, 9.45, 26.19, 32.95, 23.21], [45.75, 29.91, 50.26, 70.6, 26.8, 67.05], [7.59, 37.74, 12.09, 32.73, 22.39, 28.95], [12.32, 41.94, 14.81, 27.07, 37.75, 24.32], [11.47, 40.4, 12.14, 30.31, 32.06, 27.76], [33.06, 29.68, 37.61, 52.27, 43.77, 49.88], [6.0, 36.6, 12.01, 31.99, 26.8, 28.45], [19.49, 36.49, 21.74, 38.12, 35.74, 35.96], [29.95, 21.78, 35.58, 56.4, 14.71, 52.52], [6.6, 43.68, 7.77, 24.24, 34.58, 21.2], [10.29, 36.56, 14.57, 31.58, 32.4, 28.55], [24.56, 40.14, 26.19, 38.03, 44.51, 36.58], [32.98, 19.36, 38.32, 58.78, 22.66, 55.25], [19.07, 56.32, 16.5, 15.63, 42.31, 10.9], [17.16, 56.66, 11.65, 15.09, 40.36, 12.24], [24.84, 19.88, 30.71, 50.34, 25.44, 46.93], [19.06, 26.09, 24.5, 43.72, 27.17, 40.5], [10.19, 45.15, 8.86, 24.17, 36.87, 21.83], [25.28, 37.3, 28.48, 41.84, 42.49, 39.8], [3.75, 39.04, 8.89, 29.44, 27.56, 25.95], [15.72, 30.94, 19.97, 38.31, 30.07, 35.41], [49.84, 38.25, 53.88, 67.51, 57.3, 65.6]],
+  leftist: [{"name": "지로", "value": 80.13, "rank": 1}, {"name": "앙코", "value": 72.71, "rank": 2}, {"name": "아루", "value": 72.5, "rank": 3}, {"name": "황금", "value": 68.32, "rank": 4}, {"name": "펩제라", "value": 64.65, "rank": 5}, {"name": "와구와구", "value": 64.61, "rank": 6}, {"name": "삼각", "value": 64.57, "rank": 7}, {"name": "독변", "value": 64.46, "rank": 8}, {"name": "유이", "value": 64.16, "rank": 9}, {"name": "케팔", "value": 62.81, "rank": 10}, {"name": "규라", "value": 62.81, "rank": 11}, {"name": "블봇", "value": 62.5, "rank": 12}, {"name": "먕먕이", "value": 62.43, "rank": 13}, {"name": "어준", "value": 62.18, "rank": 14}, {"name": "우지챠", "value": 62.0, "rank": 15}, {"name": "징어", "value": 61.0, "rank": 16}, {"name": "올슨", "value": 60.97, "rank": 17}, {"name": "냐뤼링", "value": 60.79, "rank": 18}, {"name": "보스", "value": 60.51, "rank": 19}, {"name": "갤 평균", "value": 59.69, "rank": "-"}, {"name": "토루", "value": 59.55, "rank": 20}, {"name": "이치카", "value": 59.51, "rank": 21}, {"name": "렝게", "value": 59.48, "rank": 22}, {"name": "두한", "value": 57.26, "rank": 23}, {"name": "내오살", "value": 57.1, "rank": 24}, {"name": "히나", "value": 57.1, "rank": 25}, {"name": "핵뿜", "value": 54.73, "rank": 26}, {"name": "환난", "value": 54.31, "rank": 27}, {"name": "토와", "value": 53.89, "rank": 28}, {"name": "오리", "value": 50.33, "rank": 29}, {"name": "정리좀", "value": 49.6, "rank": 30}, {"name": "트리거", "value": 48.87, "rank": 31}, {"name": "대국", "value": 47.12, "rank": 32}, {"name": "시은", "value": 44.39, "rank": 33}, {"name": "백합", "value": 42.21, "rank": 34}],
+  hist: {
+    Economy: {"labels": ["[30.8, 36.6]", "(36.6, 42.5]", "(42.5, 48.3]", "(48.3, 54.1]", "(54.1, 60.0]", "(60.0, 65.8]", "(65.8, 71.6]", "(71.6, 77.4]", "(77.4, 83.3]", "(83.3, 89.1]"], "data": [1, 0, 2, 0, 1, 6, 11, 4, 7, 2]},
+    Diplomacy: {"labels": ["[18.9, 25.2]", "(25.2, 31.6]", "(31.6, 37.9]", "(37.9, 44.2]", "(44.2, 50.5]", "(50.5, 56.9]", "(56.9, 63.2]", "(63.2, 69.5]", "(69.5, 75.9]", "(75.9, 82.2]"], "data": [2, 0, 1, 12, 6, 5, 3, 2, 1, 2]},
+    Civil: {"labels": ["[19.1, 25.0]", "(25.0, 30.9]", "(30.9, 36.8]", "(36.8, 42.7]", "(42.7, 48.6]", "(48.6, 54.5]", "(54.5, 60.4]", "(60.4, 66.3]", "(66.3, 72.2]", "(72.2, 78.1]"], "data": [1, 0, 1, 2, 3, 10, 12, 3, 1, 1]},
+    Society: {"labels": ["[13.7, 17.4]", "(17.4, 21.1]", "(21.1, 24.9]", "(24.9, 28.6]", "(28.6, 32.3]", "(32.3, 36.0]", "(36.0, 39.7]", "(39.7, 43.5]", "(43.5, 47.2]", "(47.2, 50.9]"], "data": [2, 1, 2, 1, 9, 4, 11, 1, 2, 1]},
+    Leftist: {"labels": ["[42.2, 46.0]", "(46.0, 49.8]", "(49.8, 53.6]", "(53.6, 57.4]", "(57.4, 61.2]", "(61.2, 65.0]", "(65.0, 68.8]", "(68.8, 72.5]", "(72.5, 76.3]", "(76.3, 80.1]"], "data": [2, 3, 1, 6, 7, 11, 1, 1, 1, 1]}
+  },
+  meanLeftist: 59.69,
+  stdLeftist: 7.98,
+  mean: {"경제(평등)": 68.72, "외교(국가)": 49.34, "시민(자유)": 52.98, "사회(전통)": 33.37},
+  participants: 34,
+  period: "2026\ub144 1\ubd84\uae30",
+  ideology: [{"name": "민주사회주의", "count": 10}, {"name": "사회자유주의", "count": 9}, {"name": "중도주의", "count": 5}, {"name": "자유지상주의적 사회주의", "count": 3}, {"name": "국가사회주의", "count": 2}, {"name": "혁명적 사회주의", "count": 2}, {"name": "독재주의", "count": 1}, {"name": "신자유주의", "count": 1}, {"name": "좌익 대중주의", "count": 1}],
+  corr: {"keys": ["econ", "dipl", "civil", "soc"], "r": [[1.0, -0.4801, 0.1567, -0.2917], [-0.4801, 1.0, -0.7687, 0.655], [0.1567, -0.7687, 1.0, -0.7658], [-0.2917, 0.655, -0.7658, 1.0]], "n": 34, "rCrit": 0.339},
+  ideoRank: {"names": ["갤 평균", "이치카", "냐뤼링", "지로", "유이", "토루", "어준", "징어", "우지챠", "황금", "독변", "환난", "렝게", "삼각", "시은", "블봇", "케팔", "먕먕이", "트리거", "올슨", "두한", "정리좀", "와구와구", "보스", "내오살", "대국", "앙코", "아루", "오리", "토와", "펩제라", "핵뿜", "규라", "히나", "백합"], "ideologies": ["아나코 공산주의", "자유지상주의적 공산주의", "트로츠키주의", "마르크스주의", "드레온주의", "레닌주의", "스탈린주의/마오주의", "종교적 공산주의", "국가사회주의", "신정 사회주의", "종교적 사회주의", "민주사회주의", "혁명적 사회주의", "자유지상주의적 사회주의", "아나코 생디칼리슴", "좌익 대중주의", "신정 분배주의", "분배주의", "사회자유주의", "기독교 민주주의", "사회민주주의", "진보주의", "아나코 상호주의", "민족 전체주의", "세계 전체주의", "기술관료주의", "중도주의", "자유주의", "종교적 아나키즘", "우익 대중주의", "온건보수주의", "반동주의", "사회 자유지상주의", "자유지상주의", "아나코 이기주의", "나치즘", "독재주의", "파시즘", "자본주의적 파시즘", "보수주의", "신자유주의", "고전적 자유주의", "권위주의적 자본주의", "국가자본주의", "신보수주의", "근본주의", "자유지상주의적 자본주의", "시장 아나키즘", "객관주의", "전체주의적 자본주의", "초자본주의", "아나코 자본주의"], "en": ["Anarcho-Communism", "Libertarian Communism", "Trotskyism", "Marxism", "De Leonism", "Leninism", "Stalinism/Maoism", "Religious Communism", "State Socialism", "Theocratic Socialism", "Religious Socialism", "Democratic Socialism", "Revolutionary Socialism", "Libertarian Socialism", "Anarcho-Syndicalism", "Left-Wing Populism", "Theocratic Distributism", "Distributism", "Social Liberalism", "Christian Democracy", "Social Democracy", "Progressivism", "Anarcho-Mutualism", "National Totalitarianism", "Global Totalitarianism", "Technocracy", "Centrist", "Liberalism", "Religious Anarchism", "Right-Wing Populism", "Moderate Conservatism", "Reactionary", "Social Libertarianism", "Libertarianism", "Anarcho-Egoism", "Nazism", "Autocracy", "Fascism", "Capitalist Fascism", "Conservatism", "Neo-Liberalism", "Classical Liberalism", "Authoritarian Capitalism", "State Capitalism", "Neo-Conservatism", "Fundamentalism", "Libertarian Capitalism", "Market Anarchism", "Objectivism", "Totalitarian Capitalism", "Ultra-Capitalism", "Anarcho-Capitalism"], "top": [[[11, 15.08], [18, 16.27], [27, 21.8], [26, 22.19], [20, 22.53], [12, 22.99], [19, 25.63], [15, 25.95], [8, 29.27], [17, 29.69]], [[18, 11.12], [27, 17.1], [11, 18.89], [20, 19.01], [26, 20.33], [19, 25.13], [21, 26.03], [15, 26.87], [32, 28.08], [12, 28.17]], [[11, 15.97], [18, 18.13], [27, 22.64], [20, 23.22], [26, 23.73], [19, 23.89], [12, 25.11], [15, 28.59], [17, 28.91], [8, 30.57]], [[13, 5.81], [1, 20.35], [32, 26.19], [2, 28.95], [14, 30.04], [21, 30.2], [18, 32.27], [0, 34.69], [11, 34.82], [22, 38.6]], [[11, 9.76], [12, 20.92], [3, 25.59], [18, 26.7], [8, 27.03], [20, 30.31], [4, 32.72], [15, 33.48], [19, 33.79], [10, 34.14]], [[18, 15.23], [27, 16.85], [26, 18.81], [11, 20.42], [19, 22.46], [20, 24.36], [12, 26.93], [17, 26.98], [32, 27.78], [15, 29.08]], [[18, 13.43], [11, 16.71], [27, 20.51], [20, 21.83], [26, 24.5], [19, 25.89], [21, 26.73], [32, 27.02], [12, 27.38], [15, 30.55]], [[18, 13.01], [27, 13.02], [26, 19.83], [32, 22.02], [19, 23.11], [11, 24.75], [20, 25.98], [21, 28.06], [17, 28.62], [33, 29.82]], [[18, 13.72], [27, 17.78], [11, 20.03], [26, 22.49], [19, 24.35], [32, 24.56], [20, 25.03], [21, 28.27], [12, 28.36], [17, 29.61]], [[11, 14.13], [3, 20.41], [2, 27.37], [12, 27.52], [1, 28.44], [13, 29.89], [18, 29.95], [8, 33.4], [20, 33.83], [4, 34.17]], [[11, 6.76], [18, 20.38], [12, 20.99], [20, 27.21], [8, 29.18], [3, 29.74], [21, 31.11], [27, 31.26], [13, 31.39], [15, 32.32]], [[8, 11.67], [12, 14.4], [11, 23.32], [15, 23.88], [4, 26.64], [9, 30.6], [5, 30.66], [16, 33.76], [7, 33.79], [25, 34.61]], [[18, 10.87], [27, 14.63], [26, 18.9], [11, 22.02], [20, 23.73], [32, 25.24], [19, 25.93], [21, 27.37], [12, 28.62], [15, 29.53]], [[11, 9.65], [18, 15.09], [20, 24.12], [12, 24.72], [21, 25.4], [27, 28.51], [13, 29.91], [32, 30.8], [26, 31.99], [15, 32.41]], [[40, 9.38], [41, 25.22], [30, 27.76], [26, 28.9], [27, 30.59], [46, 32.01], [44, 34.16], [39, 34.3], [33, 34.87], [43, 34.91]], [[18, 8.32], [27, 15.77], [32, 20.61], [11, 22.24], [26, 23.36], [21, 24.36], [20, 24.71], [19, 27.86], [13, 29.6], [33, 30.83]], [[11, 16.34], [18, 22.79], [20, 25.78], [19, 25.92], [12, 26.92], [27, 27.92], [26, 29.33], [3, 30.21], [17, 31.35], [8, 31.37]], [[11, 16.77], [18, 17.98], [12, 21.54], [27, 24.03], [26, 26.2], [32, 28.31], [19, 28.98], [20, 29.5], [10, 31.32], [17, 31.96]], [[15, 13.85], [8, 18.97], [25, 22.15], [16, 22.23], [36, 25.03], [9, 25.51], [26, 26.56], [20, 28.14], [19, 28.48], [12, 28.98]], [[18, 11.73], [11, 15.84], [20, 19.79], [27, 20.16], [26, 23.4], [21, 25.86], [12, 26.58], [19, 26.87], [15, 27.91], [32, 28.37]], [[12, 15.11], [11, 18.27], [8, 23.79], [15, 24.21], [18, 24.42], [26, 24.96], [27, 27.98], [19, 28.74], [20, 29.03], [17, 30.41]], [[26, 15.64], [27, 16.85], [40, 18.42], [41, 20.09], [18, 23.02], [30, 25.19], [20, 27.07], [15, 27.6], [33, 31.53], [19, 31.65]], [[11, 13.09], [18, 17.88], [12, 25.39], [20, 25.46], [27, 26.73], [13, 28.83], [21, 29.07], [32, 29.28], [19, 29.57], [26, 30.21]], [[11, 16.4], [18, 18.72], [27, 22.7], [19, 23.32], [20, 23.34], [26, 23.42], [12, 25.24], [17, 28.35], [15, 28.43], [8, 30.42]], [[12, 16.82], [11, 19.19], [8, 19.52], [15, 26.03], [9, 28.34], [19, 29.08], [26, 30.2], [17, 30.32], [4, 31.79], [18, 32.13]], [[26, 14.87], [40, 14.93], [27, 20.78], [30, 21.2], [15, 25.63], [41, 27.36], [18, 28.23], [29, 28.31], [19, 30.57], [39, 30.97]], [[13, 16.45], [2, 23.31], [11, 24.68], [1, 26.06], [18, 26.27], [21, 27.2], [32, 28.19], [3, 31.74], [20, 33.45], [27, 36.31]], [[13, 18.3], [11, 19.76], [18, 22.54], [1, 24.51], [21, 26.36], [32, 27.7], [2, 30.72], [3, 33.36], [12, 33.37], [20, 34.3]], [[26, 11.18], [15, 17.79], [27, 19.16], [20, 22.62], [18, 23.52], [19, 23.52], [30, 25.06], [17, 26.4], [40, 27.01], [25, 28.63]], [[26, 14.91], [15, 18.76], [27, 19.72], [18, 20.18], [20, 21.32], [11, 22.96], [19, 23.26], [12, 26.16], [17, 26.54], [8, 28.54]], [[11, 10.56], [18, 20.18], [12, 21.75], [20, 28.3], [27, 29.38], [13, 30.19], [8, 30.89], [32, 31.43], [3, 31.51], [26, 31.63]], [[8, 13.89], [15, 17.19], [11, 18.33], [12, 20.46], [20, 25.66], [25, 26.44], [9, 29.19], [26, 29.61], [4, 30.3], [19, 31.07]], [[18, 11.75], [11, 16.65], [27, 20.34], [20, 23.41], [26, 25.03], [32, 25.28], [21, 26.1], [12, 26.88], [19, 27.65], [13, 29.94]], [[26, 17.67], [18, 20.03], [27, 20.36], [11, 20.52], [19, 21.79], [12, 23.72], [17, 24.9], [15, 25.05], [20, 25.4], [8, 29.83]], [[36, 16.17], [15, 23.9], [8, 24.28], [23, 25.01], [16, 26.92], [25, 30.06], [37, 32.12], [29, 32.26], [9, 32.92], [12, 36.77]]], "all": [[58.56, 44.41, 44.69, 37.55, 42.31, 46.21, 64.78, 45.06, 29.27, 38.1, 34.84, 15.08, 22.99, 36.11, 49.29, 25.95, 38.23, 29.69, 16.27, 25.63, 22.53, 30.44, 47.92, 60.61, 60.38, 34.93, 22.19, 21.8, 57.95, 45.49, 37.66, 46.59, 31.42, 40.38, 56.3, 76.45, 44.21, 55.61, 68.13, 50.25, 41.57, 41.09, 62.89, 55.09, 61.01, 66.24, 55.96, 68.69, 71.55, 88.63, 70.18, 84.06], [60.29, 46.06, 45.69, 40.42, 47.16, 50.72, 69.05, 49.79, 33.56, 41.58, 37.64, 18.89, 28.17, 35.13, 49.67, 26.87, 39.99, 30.6, 11.12, 25.13, 19.01, 26.03, 46.58, 61.65, 59.28, 34.27, 20.33, 17.1, 56.82, 45.23, 36.35, 46.01, 28.08, 36.31, 53.9, 77.44, 45.22, 55.97, 67.06, 48.65, 39.09, 35.63, 61.25, 52.11, 59.5, 64.89, 51.98, 65.34, 67.91, 86.53, 66.55, 80.21], [58.05, 42.37, 41.7, 35.26, 42.41, 45.65, 64.53, 42.56, 30.57, 36.22, 32.62, 15.97, 25.11, 34.57, 49.45, 28.59, 38.24, 28.91, 18.13, 23.89, 23.22, 31.1, 48.8, 62.13, 59.99, 35.57, 23.73, 22.64, 57.88, 47.14, 39.16, 47.42, 31.29, 41.38, 57.24, 77.7, 46.22, 57.07, 70.04, 51.69, 44.75, 43.6, 65.05, 57.09, 63.1, 67.76, 58.08, 70.18, 73.17, 90.89, 72.7, 85.87], [34.69, 20.35, 28.95, 43.15, 59.94, 66.81, 89.38, 64.29, 58.14, 64.65, 43.96, 34.82, 46.86, 5.81, 30.04, 59.75, 70.07, 56.04, 32.27, 50.83, 45.06, 30.2, 38.6, 94.44, 87.44, 64.75, 52.24, 43.04, 58.07, 78.26, 65.62, 75.75, 26.19, 47.65, 56.22, 109.77, 78.71, 88.83, 99.87, 79.21, 68.79, 57.16, 94.62, 84.14, 89.72, 95.9, 67.44, 72.42, 80.75, 119.54, 93.19, 90.16], [52.67, 35.65, 35.28, 25.59, 32.72, 37.46, 58.9, 36.58, 27.03, 36.74, 34.14, 9.76, 20.92, 34.31, 48.63, 33.48, 44.22, 37.28, 26.7, 33.79, 30.31, 36.61, 53.16, 66.44, 65.73, 40.31, 35.64, 35.23, 65.0, 56.12, 50.15, 57.16, 38.25, 52.1, 65.62, 83.2, 52.18, 64.61, 79.41, 62.51, 55.7, 54.87, 74.82, 68.27, 73.58, 77.89, 69.39, 80.24, 84.42, 100.23, 84.7, 96.8], [58.73, 45.36, 46.71, 41.97, 47.71, 51.38, 69.29, 47.96, 34.28, 39.55, 32.55, 20.42, 26.93, 35.28, 47.82, 29.08, 38.18, 26.98, 15.23, 22.46, 24.36, 30.38, 44.56, 62.53, 61.56, 37.66, 18.81, 16.85, 52.97, 44.4, 34.26, 44.1, 27.78, 35.21, 51.3, 76.93, 45.36, 55.21, 66.81, 47.5, 39.05, 38.16, 61.78, 53.2, 58.41, 64.01, 51.29, 63.62, 66.48, 88.02, 66.87, 79.14], [56.24, 40.85, 40.86, 36.61, 45.33, 49.14, 68.57, 47.11, 33.89, 40.8, 34.54, 16.71, 27.38, 31.12, 46.79, 30.55, 41.92, 31.57, 13.43, 25.89, 21.83, 26.73, 45.64, 65.08, 61.92, 37.12, 24.5, 20.51, 56.49, 49.3, 40.14, 49.32, 27.02, 38.32, 54.72, 80.76, 48.98, 59.7, 71.64, 52.83, 44.31, 40.4, 66.25, 57.34, 64.0, 69.15, 55.55, 67.55, 70.98, 91.75, 71.73, 83.25], [57.35, 44.48, 46.89, 45.28, 53.21, 57.04, 75.24, 52.76, 40.32, 44.08, 32.73, 24.75, 31.95, 32.08, 44.97, 34.05, 42.1, 28.62, 13.01, 23.11, 25.98, 28.06, 40.21, 67.15, 64.45, 41.52, 19.83, 13.02, 48.84, 47.05, 34.64, 45.42, 22.02, 29.82, 46.47, 80.73, 49.73, 58.41, 68.73, 48.19, 39.13, 35.17, 63.62, 53.83, 59.05, 65.09, 47.31, 58.92, 62.32, 89.77, 65.5, 74.72], [55.46, 41.5, 43.41, 40.53, 48.48, 52.49, 71.4, 48.93, 36.59, 41.77, 32.01, 20.03, 28.36, 30.98, 44.74, 32.55, 41.79, 29.61, 13.72, 24.35, 25.03, 28.27, 42.31, 66.43, 64.07, 40.06, 22.49, 17.78, 52.18, 48.49, 37.68, 47.59, 24.56, 34.67, 50.52, 80.93, 49.52, 59.29, 70.76, 51.03, 42.36, 39.07, 65.69, 56.6, 62.03, 67.66, 52.14, 63.59, 67.24, 91.74, 69.61, 79.6], [48.27, 28.44, 27.37, 20.41, 34.17, 39.51, 62.35, 39.03, 33.4, 42.34, 37.22, 14.13, 27.52, 29.89, 46.79, 41.07, 51.88, 44.19, 29.95, 39.78, 33.83, 36.51, 54.2, 73.81, 70.53, 45.71, 43.18, 40.59, 68.01, 64.37, 57.84, 64.85, 39.0, 55.91, 68.82, 90.99, 60.36, 72.78, 87.53, 70.26, 63.29, 59.52, 82.77, 75.59, 81.59, 85.77, 74.52, 84.26, 89.39, 107.76, 91.7, 101.31], [51.0, 35.72, 37.14, 29.74, 36.35, 42.31, 63.39, 43.14, 29.18, 41.26, 35.97, 6.76, 20.99, 31.39, 45.12, 32.32, 45.77, 37.76, 20.38, 34.0, 27.21, 31.11, 48.64, 67.07, 66.72, 40.32, 33.1, 31.26, 62.29, 55.17, 48.01, 56.38, 33.68, 47.3, 61.23, 83.97, 51.91, 64.44, 77.98, 60.7, 51.61, 49.06, 72.86, 65.51, 71.25, 76.42, 64.2, 75.35, 79.74, 98.11, 80.5, 91.68], [69.33, 55.06, 53.18, 36.44, 26.64, 30.66, 44.44, 33.79, 11.67, 30.6, 42.9, 23.32, 14.4, 53.74, 64.61, 23.88, 33.76, 36.61, 37.78, 36.1, 35.09, 49.1, 66.34, 49.12, 58.23, 34.61, 35.41, 41.55, 73.8, 44.36, 45.84, 50.09, 53.01, 60.45, 74.57, 66.18, 35.57, 50.03, 66.75, 55.62, 50.17, 58.78, 63.28, 61.89, 64.09, 67.94, 73.5, 86.67, 88.28, 88.17, 80.53, 101.31], [58.69, 46.77, 49.04, 45.2, 50.61, 54.92, 72.91, 53.32, 36.75, 44.54, 36.43, 22.02, 28.62, 35.0, 46.53, 29.53, 41.39, 30.26, 10.87, 25.93, 23.73, 27.37, 41.89, 63.89, 63.32, 38.78, 18.9, 14.63, 52.21, 45.07, 34.12, 45.12, 25.24, 31.87, 48.65, 78.44, 46.41, 56.32, 66.57, 47.32, 36.18, 33.29, 61.03, 51.72, 57.48, 63.87, 47.32, 60.23, 63.23, 86.81, 63.85, 75.41], [51.48, 37.17, 38.59, 32.95, 40.44, 46.7, 67.33, 48.51, 32.48, 45.22, 39.26, 9.65, 24.72, 29.91, 44.31, 32.41, 47.74, 39.26, 15.09, 34.78, 24.12, 25.4, 46.71, 67.83, 66.58, 40.03, 31.99, 28.51, 61.52, 55.1, 47.24, 56.47, 30.8, 43.98, 58.89, 85.03, 52.43, 64.91, 77.21, 59.8, 49.12, 44.15, 71.5, 63.23, 70.07, 75.66, 60.58, 72.22, 76.58, 96.24, 77.33, 88.11], [85.32, 79.13, 82.4, 77.03, 74.7, 78.87, 89.14, 79.24, 55.93, 64.68, 60.92, 53.39, 49.73, 64.91, 69.0, 40.82, 49.46, 44.49, 38.58, 43.93, 44.69, 49.38, 55.76, 60.26, 68.86, 51.73, 28.9, 30.59, 58.35, 36.06, 27.76, 39.74, 47.34, 34.87, 49.61, 68.79, 42.37, 46.59, 46.94, 34.3, 9.38, 25.22, 41.58, 34.91, 34.16, 45.82, 32.01, 49.93, 46.84, 65.04, 35.31, 57.66], [54.86, 42.36, 45.33, 43.94, 52.07, 56.75, 75.84, 54.74, 40.02, 47.2, 35.94, 22.24, 31.02, 29.6, 42.72, 34.16, 45.62, 33.16, 8.32, 27.86, 24.71, 24.36, 38.92, 68.79, 66.33, 41.9, 23.36, 15.77, 50.98, 50.04, 38.23, 49.24, 20.61, 30.83, 47.39, 83.39, 51.62, 61.31, 71.4, 51.55, 40.53, 34.34, 65.85, 55.89, 61.89, 68.26, 48.19, 59.88, 63.87, 91.4, 67.15, 75.67], [56.62, 38.69, 36.48, 30.21, 40.42, 43.19, 62.98, 38.69, 31.37, 34.85, 31.6, 16.34, 26.92, 33.01, 49.97, 32.61, 40.37, 31.35, 22.79, 25.92, 25.78, 33.13, 51.45, 64.92, 60.95, 37.54, 29.33, 27.92, 60.42, 51.58, 44.23, 51.4, 33.5, 45.93, 61.06, 80.66, 50.06, 60.86, 74.7, 56.48, 51.13, 49.33, 70.01, 62.31, 68.36, 72.33, 63.68, 74.86, 78.27, 95.69, 78.67, 91.0], [52.0, 39.88, 44.33, 39.68, 43.94, 49.43, 68.63, 47.39, 33.07, 42.01, 31.32, 16.77, 21.54, 32.39, 42.44, 32.3, 42.66, 31.96, 17.98, 28.98, 29.5, 32.37, 42.0, 66.59, 67.99, 42.69, 26.2, 24.03, 53.53, 49.95, 40.06, 49.9, 28.31, 38.85, 52.26, 81.22, 49.42, 60.21, 72.61, 53.81, 44.01, 43.54, 67.96, 60.42, 63.88, 70.07, 55.38, 66.17, 70.46, 94.3, 72.89, 82.62], [79.8, 64.06, 58.41, 42.52, 37.92, 36.52, 47.65, 36.81, 18.97, 25.51, 46.34, 29.43, 28.98, 58.59, 72.36, 13.85, 22.23, 29.85, 36.83, 28.48, 28.14, 47.7, 70.42, 38.45, 43.36, 22.15, 26.56, 36.4, 74.21, 32.29, 36.47, 38.93, 54.02, 57.61, 74.31, 56.49, 25.03, 38.78, 54.74, 43.66, 42.78, 51.91, 50.13, 47.91, 54.26, 56.04, 68.46, 83.75, 82.86, 74.68, 69.9, 96.46], [57.87, 43.17, 42.96, 37.52, 44.78, 48.79, 67.89, 48.26, 32.48, 41.42, 37.04, 15.84, 26.58, 33.23, 48.18, 27.91, 41.4, 32.19, 11.73, 26.87, 19.79, 25.86, 46.59, 63.05, 60.73, 35.2, 23.4, 20.16, 57.9, 47.75, 39.24, 48.59, 28.37, 38.48, 55.35, 79.23, 46.94, 58.17, 69.83, 51.64, 42.17, 38.41, 64.12, 55.29, 62.48, 67.78, 54.7, 67.49, 70.58, 89.34, 69.88, 82.75], [60.84, 48.36, 50.06, 40.03, 38.1, 43.15, 59.75, 43.12, 23.79, 36.56, 35.67, 18.27, 15.11, 42.7, 52.48, 24.21, 35.53, 30.41, 24.42, 28.74, 29.03, 38.29, 51.66, 56.59, 61.97, 36.81, 24.96, 27.98, 60.45, 42.72, 37.32, 45.51, 38.38, 45.39, 59.61, 71.92, 39.63, 51.89, 65.67, 49.76, 40.81, 46.11, 61.28, 56.43, 59.0, 64.63, 59.35, 71.92, 74.48, 87.51, 71.26, 87.14], [76.43, 66.37, 66.6, 60.83, 62.33, 65.22, 78.84, 65.78, 44.1, 52.27, 51.34, 38.05, 40.73, 52.27, 61.87, 27.6, 40.68, 34.64, 23.02, 31.65, 27.07, 34.83, 51.84, 55.97, 57.63, 37.0, 15.64, 16.85, 57.77, 34.37, 25.19, 37.16, 37.15, 31.53, 50.82, 69.33, 38.53, 46.43, 51.69, 34.71, 18.42, 20.09, 44.52, 34.16, 42.7, 50.04, 37.68, 55.67, 54.47, 68.99, 45.18, 66.44], [52.16, 35.67, 36.19, 31.63, 41.39, 45.84, 66.53, 43.98, 32.78, 40.53, 33.39, 13.09, 25.39, 28.83, 44.85, 33.43, 44.58, 34.68, 17.88, 29.57, 25.46, 29.07, 46.61, 67.89, 65.02, 39.81, 30.21, 26.73, 58.78, 53.92, 45.42, 53.95, 29.28, 43.16, 58.0, 83.97, 52.39, 63.71, 76.7, 58.24, 50.16, 46.43, 71.61, 63.34, 69.42, 74.37, 61.07, 72.03, 76.25, 97.13, 78.06, 88.39], [58.57, 42.81, 41.96, 35.34, 42.38, 45.46, 64.18, 42.05, 30.42, 35.54, 32.36, 16.4, 25.24, 35.11, 49.99, 28.43, 37.6, 28.35, 18.72, 23.32, 23.34, 31.64, 49.28, 61.69, 59.54, 35.32, 23.42, 22.7, 57.94, 46.68, 38.81, 46.94, 31.78, 41.61, 57.47, 77.18, 45.8, 56.57, 69.63, 51.3, 44.69, 43.85, 64.7, 56.82, 62.77, 67.35, 58.24, 70.36, 73.25, 90.59, 72.6, 86.02], [63.43, 48.61, 47.66, 34.46, 31.79, 35.04, 51.88, 32.56, 19.52, 28.34, 34.34, 19.19, 16.82, 46.29, 57.78, 26.03, 32.52, 30.32, 32.13, 29.08, 32.3, 44.27, 59.24, 54.9, 59.45, 36.04, 30.2, 35.3, 65.98, 44.74, 41.93, 47.39, 45.41, 53.83, 67.43, 70.49, 40.03, 52.32, 68.3, 53.33, 48.95, 54.99, 64.62, 60.96, 63.66, 67.54, 68.44, 80.46, 82.71, 90.67, 78.48, 95.93], [78.57, 68.72, 69.35, 61.86, 60.3, 63.22, 74.89, 63.18, 41.09, 49.09, 50.06, 39.32, 37.83, 56.18, 64.55, 25.63, 35.82, 32.03, 28.23, 30.57, 31.03, 41.01, 54.95, 51.0, 56.91, 37.22, 14.87, 20.78, 58.56, 28.31, 21.2, 32.77, 41.76, 35.55, 53.15, 63.34, 32.39, 40.27, 46.8, 30.97, 14.93, 27.36, 40.59, 33.54, 37.92, 45.66, 40.91, 58.25, 56.51, 66.53, 45.24, 69.0], [46.21, 26.06, 23.31, 31.74, 49.57, 54.3, 76.44, 51.57, 46.01, 51.28, 38.75, 24.68, 38.64, 16.45, 41.22, 47.73, 57.72, 46.06, 26.27, 40.18, 33.45, 27.2, 46.46, 81.51, 73.29, 51.2, 43.05, 36.31, 61.15, 67.58, 57.53, 66.06, 28.19, 47.77, 60.59, 97.64, 66.93, 77.48, 89.78, 70.24, 62.36, 53.61, 84.49, 74.84, 81.83, 86.56, 67.31, 75.68, 81.57, 109.29, 87.97, 92.65], [40.06, 24.51, 30.72, 33.36, 46.64, 53.83, 76.07, 53.78, 43.7, 53.73, 39.69, 19.76, 33.37, 18.3, 35.36, 46.19, 58.92, 47.57, 22.54, 42.59, 34.3, 26.36, 42.25, 81.16, 77.43, 52.18, 42.75, 35.95, 60.33, 67.44, 57.31, 66.94, 27.7, 46.4, 58.34, 97.67, 65.81, 77.45, 89.62, 70.65, 59.99, 51.54, 84.21, 75.04, 81.09, 86.99, 65.35, 73.73, 80.31, 109.12, 86.95, 90.93], [74.08, 61.31, 59.63, 50.51, 50.71, 52.48, 65.91, 51.87, 32.04, 38.89, 43.83, 29.54, 31.39, 50.56, 62.31, 17.79, 29.77, 26.4, 23.52, 23.52, 22.62, 36.82, 56.01, 48.51, 50.92, 28.63, 11.18, 19.16, 60.8, 30.23, 25.06, 34.04, 39.93, 39.51, 57.66, 63.5, 30.94, 41.34, 51.86, 35.47, 27.01, 33.52, 45.86, 38.61, 45.75, 50.89, 49.42, 65.61, 64.99, 71.75, 55.39, 78.01], [68.07, 54.76, 53.6, 44.52, 45.7, 48.23, 63.66, 47.65, 28.54, 36.89, 39.71, 22.96, 26.16, 45.23, 57.42, 18.76, 31.68, 26.54, 20.18, 23.26, 21.32, 34.23, 53.13, 52.15, 53.93, 29.68, 14.91, 19.72, 59.94, 35.84, 29.9, 38.67, 36.88, 40.19, 57.53, 67.77, 35.04, 46.33, 58.16, 41.37, 32.96, 36.9, 52.58, 45.48, 51.87, 56.96, 52.54, 67.43, 68.23, 78.41, 61.8, 81.13], [50.34, 35.11, 37.35, 31.51, 38.77, 44.14, 65.01, 43.01, 30.89, 40.55, 32.92, 10.56, 21.75, 30.19, 43.72, 33.41, 44.96, 35.61, 20.18, 31.77, 28.3, 31.75, 46.51, 67.93, 67.24, 41.41, 31.63, 29.38, 59.33, 54.56, 46.43, 54.97, 31.43, 45.11, 58.76, 84.01, 52.3, 64.08, 77.53, 59.48, 50.9, 48.61, 72.66, 65.09, 70.22, 75.45, 62.51, 73.19, 77.7, 98.37, 79.59, 89.78], [69.53, 53.61, 49.23, 33.26, 30.3, 31.65, 48.19, 34.86, 13.89, 29.19, 42.66, 18.33, 20.46, 49.79, 63.61, 17.19, 31.57, 33.35, 31.11, 31.07, 25.66, 41.88, 64.2, 48.48, 51.81, 26.44, 29.61, 35.28, 72.18, 42.25, 42.38, 47.15, 48.23, 55.83, 71.94, 67.02, 35.13, 49.45, 64.97, 51.98, 46.98, 52.27, 60.08, 56.19, 62.49, 65.59, 69.13, 83.37, 84.56, 84.55, 76.06, 97.61], [54.22, 40.05, 41.74, 38.21, 46.22, 50.78, 70.39, 49.23, 35.03, 43.1, 34.67, 16.65, 26.88, 29.94, 44.24, 31.67, 43.68, 32.77, 11.75, 27.65, 23.41, 26.1, 42.99, 66.67, 64.48, 39.26, 25.03, 20.34, 55.01, 50.3, 40.42, 50.24, 25.28, 36.85, 52.71, 82.16, 50.16, 60.89, 72.47, 53.48, 43.77, 39.42, 67.06, 58.06, 64.22, 69.9, 54.05, 65.75, 69.62, 92.63, 71.36, 81.65], [62.02, 48.8, 49.48, 42.02, 44.58, 47.89, 64.68, 44.72, 29.83, 35.67, 32.99, 20.52, 23.72, 40.37, 51.87, 25.05, 33.54, 24.9, 20.03, 21.79, 25.4, 34.72, 48.92, 57.64, 59.07, 35.32, 17.67, 20.36, 55.77, 40.43, 32.26, 41.23, 33.52, 39.28, 54.79, 72.11, 40.37, 50.77, 63.39, 45.15, 37.8, 40.76, 58.68, 51.62, 55.91, 61.21, 53.82, 66.65, 68.75, 85.19, 66.52, 81.75], [93.56, 78.89, 73.16, 54.32, 41.73, 39.66, 39.85, 43.15, 24.28, 32.92, 59.63, 44.26, 36.77, 74.89, 86.88, 23.9, 26.92, 41.95, 52.61, 42.77, 42.79, 62.85, 84.83, 25.01, 44.0, 30.06, 40.37, 51.59, 87.01, 32.26, 44.93, 43.8, 70.08, 71.54, 87.41, 43.74, 16.17, 32.12, 49.71, 47.99, 48.91, 63.46, 47.34, 51.52, 53.92, 55.09, 79.42, 95.29, 92.88, 69.28, 74.37, 106.4]], "pos": [[39, 25, 26, 16, 23, 29, 44, 27, 9, 18, 13, 1, 6, 15, 32, 8, 19, 10, 2, 7, 5, 11, 31, 41, 40, 14, 4, 3, 38, 28, 17, 30, 12, 20, 37, 50, 24, 35, 46, 33, 22, 21, 43, 34, 42, 45, 36, 47, 49, 52, 48, 51], [41, 27, 25, 21, 29, 33, 49, 32, 12, 22, 18, 3, 10, 14, 31, 8, 20, 11, 1, 6, 4, 7, 28, 43, 39, 13, 5, 2, 38, 24, 17, 26, 9, 16, 36, 50, 23, 37, 47, 30, 19, 15, 42, 35, 40, 44, 34, 45, 48, 52, 46, 51], [38, 22, 21, 15, 23, 27, 43, 24, 10, 17, 13, 1, 7, 14, 32, 8, 18, 9, 2, 6, 4, 11, 31, 41, 40, 16, 5, 3, 37, 29, 19, 30, 12, 20, 36, 50, 28, 34, 46, 33, 26, 25, 44, 35, 42, 45, 39, 47, 49, 52, 48, 51], [8, 2, 4, 12, 25, 30, 43, 26, 23, 27, 13, 9, 15, 1, 5, 24, 33, 19, 7, 17, 14, 6, 10, 47, 41, 28, 18, 11, 22, 36, 29, 35, 3, 16, 20, 51, 37, 42, 50, 38, 32, 21, 48, 40, 44, 49, 31, 34, 39, 52, 46, 45], [28, 15, 13, 3, 7, 20, 34, 16, 5, 18, 10, 1, 2, 11, 24, 8, 23, 19, 4, 9, 6, 17, 29, 40, 39, 22, 14, 12, 37, 32, 25, 33, 21, 26, 38, 48, 27, 36, 46, 35, 31, 30, 44, 41, 43, 45, 42, 47, 49, 52, 50, 51], [40, 26, 28, 22, 30, 35, 49, 32, 14, 21, 12, 4, 7, 16, 31, 10, 19, 8, 1, 5, 6, 11, 25, 43, 41, 17, 3, 2, 36, 24, 13, 23, 9, 15, 34, 50, 27, 38, 47, 29, 20, 18, 42, 37, 39, 45, 33, 44, 46, 52, 48, 51], [36, 21, 22, 15, 25, 30, 45, 28, 13, 20, 14, 2, 9, 11, 27, 10, 23, 12, 1, 6, 4, 7, 26, 42, 40, 16, 5, 3, 37, 31, 18, 32, 8, 17, 34, 50, 29, 39, 48, 33, 24, 19, 43, 38, 41, 46, 35, 44, 47, 52, 49, 51], [38, 23, 28, 25, 35, 37, 50, 34, 19, 22, 13, 6, 11, 12, 24, 14, 21, 9, 1, 5, 7, 8, 18, 47, 44, 20, 3, 2, 32, 29, 15, 26, 4, 10, 27, 51, 33, 39, 48, 31, 17, 16, 43, 36, 41, 45, 30, 40, 42, 52, 46, 49], [37, 20, 25, 19, 28, 36, 49, 30, 15, 21, 12, 3, 9, 11, 26, 13, 22, 10, 1, 5, 7, 8, 23, 44, 42, 18, 4, 2, 35, 29, 16, 27, 6, 14, 32, 51, 31, 39, 48, 33, 24, 17, 43, 38, 40, 46, 34, 41, 45, 52, 47, 50], [24, 5, 3, 2, 10, 15, 31, 14, 8, 19, 12, 1, 4, 6, 23, 18, 25, 21, 7, 16, 9, 11, 26, 40, 38, 22, 20, 17, 35, 33, 28, 34, 13, 27, 36, 49, 30, 39, 47, 37, 32, 29, 44, 42, 43, 46, 41, 45, 48, 52, 50, 51], [29, 14, 17, 6, 16, 21, 37, 22, 5, 20, 15, 1, 3, 9, 23, 10, 24, 18, 2, 13, 4, 7, 27, 42, 41, 19, 11, 8, 36, 32, 26, 33, 12, 25, 35, 50, 31, 39, 47, 34, 30, 28, 44, 40, 43, 46, 38, 45, 48, 52, 49, 51], [44, 31, 29, 15, 5, 7, 21, 9, 1, 6, 19, 3, 2, 30, 39, 4, 8, 16, 17, 14, 11, 23, 41, 24, 33, 10, 12, 18, 46, 20, 22, 26, 28, 35, 47, 40, 13, 25, 42, 32, 27, 34, 37, 36, 38, 43, 45, 49, 51, 50, 48, 52], [40, 28, 32, 25, 33, 37, 49, 36, 18, 22, 17, 4, 9, 15, 27, 10, 20, 11, 1, 7, 5, 8, 21, 47, 44, 19, 3, 2, 35, 23, 14, 24, 6, 12, 31, 51, 26, 38, 48, 30, 16, 13, 42, 34, 39, 46, 29, 41, 43, 52, 45, 50], [30, 14, 15, 12, 19, 24, 41, 28, 11, 23, 16, 1, 4, 7, 22, 10, 27, 17, 2, 13, 3, 5, 25, 42, 40, 18, 9, 6, 37, 32, 26, 33, 8, 20, 34, 50, 31, 39, 48, 35, 29, 21, 44, 38, 43, 46, 36, 45, 47, 52, 49, 51], [51, 48, 50, 46, 45, 47, 52, 49, 34, 39, 38, 32, 29, 40, 44, 15, 27, 19, 13, 18, 20, 26, 33, 37, 43, 31, 4, 5, 36, 12, 3, 14, 25, 9, 28, 42, 17, 22, 24, 8, 1, 2, 16, 10, 7, 21, 6, 30, 23, 41, 11, 35], [36, 21, 24, 23, 34, 38, 50, 35, 18, 26, 15, 4, 11, 9, 22, 13, 25, 12, 1, 8, 7, 6, 17, 47, 44, 20, 5, 2, 31, 30, 16, 29, 3, 10, 27, 51, 33, 40, 48, 32, 19, 14, 43, 37, 41, 46, 28, 39, 42, 52, 45, 49], [34, 19, 17, 8, 22, 23, 40, 20, 10, 16, 11, 1, 5, 13, 27, 12, 21, 9, 2, 4, 3, 14, 31, 42, 37, 18, 7, 6, 35, 32, 24, 30, 15, 25, 38, 50, 28, 36, 46, 33, 29, 26, 44, 39, 43, 45, 41, 47, 48, 52, 49, 51], [33, 17, 27, 16, 25, 30, 45, 28, 14, 20, 9, 1, 3, 13, 21, 11, 22, 10, 2, 7, 8, 12, 19, 42, 44, 23, 5, 4, 35, 32, 18, 31, 6, 15, 34, 50, 29, 38, 48, 36, 26, 24, 43, 39, 40, 46, 37, 41, 47, 52, 49, 51], [49, 41, 39, 23, 19, 16, 28, 17, 2, 6, 27, 11, 10, 40, 45, 1, 4, 12, 18, 9, 8, 29, 44, 20, 25, 3, 7, 14, 46, 13, 15, 22, 33, 38, 47, 37, 5, 21, 35, 26, 24, 32, 31, 30, 34, 36, 42, 51, 50, 48, 43, 52], [37, 24, 23, 16, 25, 32, 46, 30, 12, 21, 15, 2, 7, 13, 29, 9, 20, 11, 1, 8, 3, 6, 26, 42, 40, 14, 5, 4, 38, 28, 19, 31, 10, 18, 36, 50, 27, 39, 47, 33, 22, 17, 43, 35, 41, 45, 34, 44, 49, 52, 48, 51], [42, 29, 31, 20, 16, 25, 40, 24, 3, 13, 12, 2, 1, 22, 34, 4, 11, 10, 5, 8, 9, 17, 32, 36, 44, 14, 6, 7, 41, 23, 15, 27, 18, 26, 39, 48, 19, 33, 46, 30, 21, 28, 43, 35, 37, 45, 38, 49, 50, 52, 47, 51], [51, 46, 48, 41, 43, 44, 52, 45, 25, 34, 31, 20, 23, 35, 42, 8, 22, 13, 5, 10, 7, 15, 33, 38, 39, 16, 1, 2, 40, 12, 6, 18, 17, 9, 30, 50, 21, 28, 32, 14, 3, 4, 26, 11, 24, 29, 19, 37, 36, 49, 27, 47], [30, 16, 17, 11, 20, 26, 41, 22, 12, 19, 13, 1, 3, 6, 24, 14, 23, 15, 2, 9, 4, 7, 28, 42, 40, 18, 10, 5, 36, 32, 25, 33, 8, 21, 34, 50, 31, 39, 48, 35, 29, 27, 44, 38, 43, 46, 37, 45, 47, 52, 49, 51], [39, 24, 21, 16, 23, 27, 43, 22, 10, 17, 13, 1, 7, 14, 32, 9, 18, 8, 2, 4, 5, 11, 31, 41, 40, 15, 6, 3, 37, 29, 19, 30, 12, 20, 36, 50, 28, 34, 46, 33, 26, 25, 44, 35, 42, 45, 38, 47, 49, 52, 48, 51], [39, 27, 26, 15, 9, 16, 29, 13, 3, 5, 14, 2, 1, 24, 35, 4, 12, 8, 10, 6, 11, 21, 36, 33, 37, 18, 7, 17, 42, 22, 20, 25, 23, 32, 43, 47, 19, 30, 45, 31, 28, 34, 41, 38, 40, 44, 46, 49, 50, 51, 48, 52], [52, 48, 50, 42, 41, 44, 51, 43, 26, 31, 32, 21, 19, 36, 46, 5, 17, 12, 7, 9, 11, 25, 35, 33, 38, 18, 1, 3, 40, 8, 4, 14, 27, 16, 34, 45, 13, 22, 30, 10, 2, 6, 23, 15, 20, 29, 24, 39, 37, 47, 28, 49], [18, 4, 2, 8, 22, 27, 41, 25, 16, 24, 12, 3, 11, 1, 14, 20, 29, 17, 5, 13, 9, 6, 19, 43, 38, 23, 15, 10, 31, 36, 28, 33, 7, 21, 30, 51, 34, 42, 49, 37, 32, 26, 46, 39, 45, 47, 35, 40, 44, 52, 48, 50], [14, 4, 7, 8, 21, 27, 40, 26, 18, 25, 13, 2, 9, 1, 11, 19, 30, 22, 3, 16, 10, 5, 15, 45, 41, 24, 17, 12, 32, 36, 28, 35, 6, 20, 29, 51, 34, 42, 49, 37, 31, 23, 46, 39, 44, 48, 33, 38, 43, 52, 47, 50], [51, 44, 42, 31, 33, 38, 49, 37, 16, 22, 26, 11, 15, 32, 45, 2, 12, 8, 5, 6, 4, 20, 40, 29, 35, 10, 1, 3, 43, 13, 7, 18, 24, 23, 41, 46, 14, 25, 36, 19, 9, 17, 28, 21, 27, 34, 30, 48, 47, 50, 39, 52], [49, 39, 37, 25, 28, 31, 46, 30, 10, 19, 22, 6, 8, 26, 41, 2, 13, 9, 4, 7, 5, 15, 36, 33, 38, 11, 1, 3, 44, 17, 12, 21, 18, 23, 42, 48, 16, 29, 43, 24, 14, 20, 35, 27, 32, 40, 34, 47, 50, 51, 45, 52], [29, 15, 17, 9, 18, 23, 39, 21, 7, 19, 13, 1, 3, 6, 22, 14, 24, 16, 2, 12, 4, 11, 27, 42, 41, 20, 10, 5, 35, 32, 26, 33, 8, 25, 34, 50, 31, 38, 47, 36, 30, 28, 44, 40, 43, 46, 37, 45, 48, 52, 49, 51], [45, 34, 28, 14, 9, 13, 25, 16, 1, 7, 22, 3, 4, 30, 39, 2, 12, 15, 11, 10, 5, 19, 40, 27, 31, 6, 8, 18, 47, 20, 21, 24, 26, 35, 46, 43, 17, 29, 41, 32, 23, 33, 37, 36, 38, 42, 44, 49, 51, 50, 48, 52], [36, 19, 21, 16, 27, 32, 47, 28, 14, 23, 13, 2, 8, 10, 26, 11, 24, 12, 1, 9, 4, 7, 22, 43, 41, 17, 5, 3, 37, 31, 20, 30, 6, 15, 33, 51, 29, 39, 49, 34, 25, 18, 44, 38, 40, 46, 35, 42, 45, 52, 48, 50], [44, 30, 32, 25, 26, 29, 46, 27, 10, 17, 12, 4, 6, 20, 35, 8, 14, 7, 2, 5, 9, 15, 31, 40, 42, 16, 1, 3, 38, 22, 11, 24, 13, 19, 37, 50, 21, 33, 45, 28, 18, 23, 41, 34, 39, 43, 36, 48, 49, 52, 47, 51], [50, 43, 40, 32, 14, 11, 12, 18, 3, 9, 34, 22, 10, 42, 46, 2, 5, 15, 30, 16, 17, 35, 45, 4, 21, 6, 13, 29, 47, 8, 23, 20, 38, 39, 48, 19, 1, 7, 27, 25, 26, 36, 24, 28, 31, 33, 44, 51, 49, 37, 41, 52]]},
+  ideoRef: [{"name": "아나코 공산주의", "en": "Anarcho-Communism", "e": 100, "n": 50, "l": 100, "t": 10, "count": 0}, {"name": "자유지상주의적 공산주의", "en": "Libertarian Communism", "e": 100, "n": 30, "l": 80, "t": 20, "count": 0}, {"name": "트로츠키주의", "en": "Trotskyism", "e": 100, "n": 0, "l": 60, "t": 20, "count": 0}, {"name": "마르크스주의", "en": "Marxism", "e": 100, "n": 30, "l": 40, "t": 20, "count": 0}, {"name": "드레온주의", "en": "De Leonism", "e": 100, "n": 70, "l": 30, "t": 20, "count": 0}, {"name": "레닌주의", "en": "Leninism", "e": 100, "n": 60, "l": 20, "t": 30, "count": 0}, {"name": "스탈린주의/마오주의", "en": "Stalinism/Maoism", "e": 100, "n": 80, "l": 0, "t": 40, "count": 0}, {"name": "종교적 공산주의", "en": "Religious Communism", "e": 100, "n": 50, "l": 30, "t": 70, "count": 0}, {"name": "국가사회주의", "en": "State Socialism", "e": 80, "n": 70, "l": 30, "t": 30, "count": 2}, {"name": "신정 사회주의", "en": "Theocratic Socialism", "e": 80, "n": 50, "l": 30, "t": 80, "count": 0}, {"name": "종교적 사회주의", "en": "Religious Socialism", "e": 80, "n": 50, "l": 70, "t": 80, "count": 0}, {"name": "민주사회주의", "en": "Democratic Socialism", "e": 80, "n": 50, "l": 50, "t": 20, "count": 10}, {"name": "혁명적 사회주의", "en": "Revolutionary Socialism", "e": 80, "n": 80, "l": 50, "t": 30, "count": 2}, {"name": "자유지상주의적 사회주의", "en": "Libertarian Socialism", "e": 80, "n": 20, "l": 80, "t": 20, "count": 3}, {"name": "아나코 생디칼리슴", "en": "Anarcho-Syndicalism", "e": 80, "n": 50, "l": 100, "t": 20, "count": 0}, {"name": "좌익 대중주의", "en": "Left-Wing Populism", "e": 60, "n": 60, "l": 30, "t": 30, "count": 1}, {"name": "신정 분배주의", "en": "Theocratic Distributism", "e": 60, "n": 60, "l": 30, "t": 80, "count": 0}, {"name": "분배주의", "en": "Distributism", "e": 60, "n": 50, "l": 50, "t": 80, "count": 0}, {"name": "사회자유주의", "en": "Social Liberalism", "e": 60, "n": 40, "l": 60, "t": 20, "count": 9}, {"name": "기독교 민주주의", "en": "Christian Democracy", "e": 60, "n": 40, "l": 50, "t": 70, "count": 0}, {"name": "사회민주주의", "en": "Social Democracy", "e": 60, "n": 30, "l": 40, "t": 20, "count": 0}, {"name": "진보주의", "en": "Progressivism", "e": 60, "n": 20, "l": 60, "t": 0, "count": 0}, {"name": "아나코 상호주의", "en": "Anarcho-Mutualism", "e": 60, "n": 50, "l": 100, "t": 30, "count": 0}, {"name": "민족 전체주의", "en": "National Totalitarianism", "e": 50, "n": 80, "l": 0, "t": 50, "count": 0}, {"name": "세계 전체주의", "en": "Global Totalitarianism", "e": 50, "n": 20, "l": 0, "t": 50, "count": 0}, {"name": "기술관료주의", "en": "Technocracy", "e": 60, "n": 40, "l": 20, "t": 30, "count": 0}, {"name": "중도주의", "en": "Centrist", "e": 50, "n": 50, "l": 50, "t": 50, "count": 5}, {"name": "자유주의", "en": "Liberalism", "e": 50, "n": 40, "l": 60, "t": 40, "count": 0}, {"name": "종교적 아나키즘", "en": "Religious Anarchism", "e": 50, "n": 50, "l": 100, "t": 80, "count": 0}, {"name": "우익 대중주의", "en": "Right-Wing Populism", "e": 40, "n": 70, "l": 30, "t": 70, "count": 0}, {"name": "온건보수주의", "en": "Moderate Conservatism", "e": 40, "n": 60, "l": 50, "t": 70, "count": 0}, {"name": "반동주의", "en": "Reactionary", "e": 40, "n": 60, "l": 40, "t": 90, "count": 0}, {"name": "사회 자유지상주의", "en": "Social Libertarianism", "e": 60, "n": 30, "l": 80, "t": 30, "count": 0}, {"name": "자유지상주의", "en": "Libertarianism", "e": 40, "n": 40, "l": 80, "t": 40, "count": 0}, {"name": "아나코 이기주의", "en": "Anarcho-Egoism", "e": 40, "n": 50, "l": 100, "t": 50, "count": 0}, {"name": "나치즘", "en": "Nazism", "e": 40, "n": 100, "l": 0, "t": 95, "count": 0}, {"name": "독재주의", "en": "Autocracy", "e": 50, "n": 80, "l": 20, "t": 50, "count": 1}, {"name": "파시즘", "en": "Fascism", "e": 40, "n": 80, "l": 20, "t": 80, "count": 0}, {"name": "자본주의적 파시즘", "en": "Capitalist Fascism", "e": 20, "n": 80, "l": 20, "t": 80, "count": 0}, {"name": "보수주의", "en": "Conservatism", "e": 30, "n": 60, "l": 40, "t": 80, "count": 0}, {"name": "신자유주의", "en": "Neo-Liberalism", "e": 30, "n": 70, "l": 50, "t": 40, "count": 1}, {"name": "고전적 자유주의", "en": "Classical Liberalism", "e": 30, "n": 40, "l": 60, "t": 20, "count": 0}, {"name": "권위주의적 자본주의", "en": "Authoritarian Capitalism", "e": 20, "n": 70, "l": 20, "t": 60, "count": 0}, {"name": "국가자본주의", "en": "State Capitalism", "e": 20, "n": 50, "l": 30, "t": 50, "count": 0}, {"name": "신보수주의", "en": "Neo-Conservatism", "e": 20, "n": 80, "l": 40, "t": 80, "count": 0}, {"name": "근본주의", "en": "Fundamentalism", "e": 20, "n": 70, "l": 30, "t": 95, "count": 0}, {"name": "자유지상주의적 자본주의", "en": "Libertarian Capitalism", "e": 20, "n": 50, "l": 80, "t": 40, "count": 0}, {"name": "시장 아나키즘", "en": "Market Anarchism", "e": 20, "n": 50, "l": 100, "t": 50, "count": 0}, {"name": "객관주의", "en": "Objectivism", "e": 10, "n": 50, "l": 90, "t": 60, "count": 0}, {"name": "전체주의적 자본주의", "en": "Totalitarian Capitalism", "e": 0, "n": 70, "l": 0, "t": 50, "count": 0}, {"name": "초자본주의", "en": "Ultra-Capitalism", "e": 0, "n": 60, "l": 50, "t": 50, "count": 0}, {"name": "아나코 자본주의", "en": "Anarcho-Capitalism", "e": 0, "n": 50, "l": 100, "t": 50, "count": 0}],
+  meanIdeology: "민주사회주의"
+};
+
+(function () {
+  'use strict';
+  const $ = (s, r) => (r || document).querySelector(s);
+  const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const root = document.documentElement;
+  const cssVar = (n, fb) => (getComputedStyle(root).getPropertyValue(n).trim() || fb);
+
+  /* ---------- 색 계산 ---------- */
+  function parseColor(c) {
+    c = String(c).trim();
+    if (c[0] === '#') {
+      let h = c.slice(1);
+      if (h.length === 3) h = h.split('').map(x => x + x).join('');
+      return [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16));
+    }
+    const m = c.match(/[\d.]+/g);
+    return m ? m.slice(0, 3).map(Number) : [255, 255, 255];
+  }
+  const mix = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
+  const rgb = a => `rgb(${a[0]}, ${a[1]}, ${a[2]})`;
+  const light = a => (0.299 * a[0] + 0.587 * a[1] + 0.114 * a[2]) / 255 > 0.55;
+
+  function palette() {
+    return {
+      near: parseColor(cssVar('--heat-near', '#a7daac')),
+      mid: parseColor(cssVar('--heat-mid', '#ffffff')),
+      far: parseColor(cssVar('--heat-far', '#f67280')),
+      low: parseColor(cssVar('--lean-low', '#60a5fa')),
+      lmid: parseColor(cssVar('--lean-mid', '#ffffff')),
+      high: parseColor(cssVar('--lean-high', '#f67280')),
+      inkLight: cssVar('--ink-on-light', '#16181d'),
+      inkDark: cssVar('--ink-on-dark', '#ffffff')
+    };
+  }
+  const HEAT_MID = 23, HEAT_MAX = 46;   // 8values 식 거리 기준 (예전 직선거리 기준 27·55에 해당)
+  function heatColor(v, P) {
+    let c;
+    if (v === 0) c = P.mid;
+    else if (v < HEAT_MID) c = mix(P.near, P.mid, v / HEAT_MID);
+    else c = mix(P.mid, P.far, Math.min((v - HEAT_MID) / (HEAT_MAX - HEAT_MID), 1));
+    return { bg: rgb(c), fg: light(c) ? P.inkLight : P.inkDark };
+  }
+  function leanColor(v, P) {
+    const s = D.leftist.filter(x => x.rank !== '-').map(x => x.value);
+    if (!s.length) return { bg: rgb(P.lmid), fg: P.inkLight };
+    const min = Math.min(...s), max = Math.max(...s), mid = (min + max) / 2;
+    let c = P.lmid;
+    if (max !== min) {
+      c = v <= mid ? mix(P.low, P.lmid, Math.max(0, (v - min) / (mid - min)))
+                   : mix(P.lmid, P.high, Math.min(1, (v - mid) / (max - mid)));
+    }
+    return { bg: rgb(c), fg: light(c) ? P.inkLight : P.inkDark };
+  }
+
+  /* ---------- 탭 ---------- */
+  const TAB_IDS = $$('.tab-panel').map(p => p.id.replace('panel-', ''));
+  function switchTab(id, opts) {
+    if (!TAB_IDS.includes(id)) id = TAB_IDS[0];
+    $$('[data-tab]').forEach(b => {
+      const on = b.dataset.tab === id;
+      b.classList.toggle('is-active', on);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    $$('.tab-panel').forEach(p => p.classList.toggle('is-active', p.id === 'panel-' + id));
+    if (!opts || !opts.silent) {
+      try { history.replaceState(null, '', '#' + id); } catch (e) {}
+    }
+    if (opts && opts.scroll) {
+      const anchor = $('[data-tab-anchor]') || $('#panel-' + id);
+      anchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  /* ---------- 거리 행렬 ---------- */
+  function renderMatrix() {
+    const t = $('#distance-table');
+    if (!t) return;
+    const P = palette();
+    let h = '<thead><tr><th class="mx-corner" scope="col"></th>';
+    D.names.forEach(n => {
+      h += `<th scope="col" class="mx-head" tabindex="0" data-name="${esc(n)}">${esc(n)}</th>`;
+    });
+    h += '</tr></thead><tbody>';
+    D.names.forEach((r, i) => {
+      h += `<tr><th scope="row" class="mx-head mx-row" tabindex="0" data-name="${esc(r)}">${esc(r)}</th>`;
+      D.matrix[i].forEach(v => {
+        const c = heatColor(v, P);
+        h += `<td class="mx-cell${v === 0 ? ' is-self' : ''}" style="background:${c.bg};color:${c.fg}">${v === 0 ? '0' : v.toFixed(2)}</td>`;
+      });
+      h += '</tr>';
+    });
+    t.innerHTML = h + '</tbody>';
+  }
+
+  let currentDetail = null;
+  function showDetail(name) {
+    currentDetail = name;
+    if ($('#ir-select')) renderIdeoRank(name);
+    const mv = $('#distance-matrix-view'), dv = $('#distance-detail-view');
+    if (mv) mv.hidden = true;
+    if (dv) dv.hidden = false;
+    $('#detail-target-name').textContent = name;
+    const suffix = $('#detail-target-suffix');
+    if (suffix) suffix.textContent = name === '갤 평균' ? '과의 성향 거리' : ' 님과의 성향 거리';
+    renderDetail();
+    const anchor = $('#panel-distance');
+    if (anchor) anchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  function renderDetail() {
+    const tb = $('#detail-table-body');
+    if (!tb || currentDetail === null) return;
+    const P = palette();
+    const ti = D.names.indexOf(currentDetail);
+    const rows = D.names.map((n, i) => ({ name: n, d: D.matrix[ti][i] }))
+      .filter((_, i) => i !== ti)
+      .sort((a, b) => a.d - b.d);
+    tb.innerHTML = rows.map((r, i) => {
+      const c = heatColor(r.d, P);
+      return `<tr><td class="c-rank">${i + 1}</td><td class="c-name">${esc(r.name)}</td>`
+        + `<td class="c-dist" style="background:${c.bg};color:${c.fg}">${r.d.toFixed(2)}</td></tr>`;
+    }).join('');
+  }
+  function showMatrixView() {
+    currentDetail = null;
+    const mv = $('#distance-matrix-view'), dv = $('#distance-detail-view');
+    if (dv) dv.hidden = true;
+    if (mv) mv.hidden = false;
+    const anchor = $('#panel-distance');
+    if (anchor) anchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  /* ---------- 전체 보기: 표 하나를 통째로 띄우고 확대·축소 ---------- */
+  const V = { z: 1, fit: true, tw: 0, th: 0 };
+  let lastFocus = null, dragMoved = false;
+  const stageEl = () => $('#full-table-stage');
+  const clampZ = z => Math.min(3, Math.max(0.08, z));
+  function fitScale() {
+    const st = stageEl();
+    if (!st || !V.tw) return 1;
+    return clampZ(Math.min(1, (st.clientWidth - 2) / V.tw, (st.clientHeight - 2) / V.th));
+  }
+  function setZoom(z, anchor) {
+    const st = stageEl(), sizer = $('#full-table-container');
+    const tbl = sizer && sizer.firstElementChild;
+    if (!st || !tbl) return;
+    z = clampZ(z);
+    const ax = anchor ? anchor.x : st.clientWidth / 2, ay = anchor ? anchor.y : st.clientHeight / 2;
+    const px = (st.scrollLeft + ax) / V.z, py = (st.scrollTop + ay) / V.z;   // 기준점이 화면에서 움직이지 않게
+    V.z = z;
+    tbl.style.transform = `scale(${z})`;
+    sizer.style.width = Math.ceil(V.tw * z) + 'px';
+    sizer.style.height = Math.ceil(V.th * z) + 'px';
+    st.scrollLeft = px * z - ax;
+    st.scrollTop = py * z - ay;
+    const out = $('#zoom-level');
+    if (out) out.textContent = Math.round(z * 100) + '%';
+  }
+  function showFullTable(keep) {
+    const modal = $('#full-table-modal'), sizer = $('#full-table-container'), st = stageEl();
+    if (!modal || !sizer || !st) return;
+    const prev = keep === true ? { z: V.z, fit: V.fit, sl: st.scrollLeft, sp: st.scrollTop } : null;
+    const clone = $('#distance-table').cloneNode(true);
+    clone.id = 'cloned-distance-table';
+    clone.querySelectorAll('[tabindex]').forEach(el => el.setAttribute('tabindex', '0'));
+    sizer.innerHTML = '';
+    sizer.appendChild(clone);
+    if (!prev) lastFocus = document.activeElement;
+    modal.hidden = false;
+    document.body.style.overflow = 'hidden';
+    V.tw = clone.offsetWidth;
+    V.th = clone.offsetHeight;
+    V.z = 1;
+    st.scrollLeft = 0;
+    st.scrollTop = 0;
+    if (prev && !prev.fit) {
+      V.fit = false;
+      setZoom(prev.z, { x: 0, y: 0 });
+      st.scrollLeft = prev.sl;
+      st.scrollTop = prev.sp;
+    } else {
+      V.fit = true;
+      setZoom(fitScale(), { x: 0, y: 0 });
+      st.scrollLeft = 0;
+      st.scrollTop = 0;
+    }
+    if (!prev) {
+      const close = $('[data-action="close-full"]', modal);
+      if (close) close.focus({ preventScroll: true });
+    }
+  }
+  function closeFullTable() {
+    const modal = $('#full-table-modal');
+    if (!modal || modal.hidden) return;
+    modal.hidden = true;
+    document.body.style.overflow = '';
+    if (lastFocus) lastFocus.focus({ preventScroll: true });
+  }
+  function zoomBy(f, anchor) { V.fit = false; setZoom(V.z * f, anchor); }
+  (function bindViewer() {
+    const st = stageEl();
+    if (!st) return;
+    // Ctrl(⌘)+휠, 트랙패드 핀치
+    st.addEventListener('wheel', e => {
+      if (!e.ctrlKey && !e.metaKey) return;
+      e.preventDefault();
+      const r = st.getBoundingClientRect();
+      zoomBy(Math.exp(-e.deltaY * 0.0025), { x: e.clientX - r.left, y: e.clientY - r.top });
+    }, { passive: false });
+    // 두 손가락 확대·축소
+    let pinch = null;
+    const dist = t => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+    st.addEventListener('touchstart', e => {
+      if (e.touches.length === 2) pinch = { d: dist(e.touches), z: V.z };
+    }, { passive: true });
+    st.addEventListener('touchmove', e => {
+      if (!pinch || e.touches.length !== 2) return;
+      e.preventDefault();
+      const r = st.getBoundingClientRect();
+      const mx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - r.left;
+      const my = (e.touches[0].clientY + e.touches[1].clientY) / 2 - r.top;
+      V.fit = false;
+      setZoom(pinch.z * dist(e.touches) / pinch.d, { x: mx, y: my });
+    }, { passive: false });
+    st.addEventListener('touchend', e => { if (e.touches.length < 2) pinch = null; });
+    // 마우스로 끌어서 이동
+    let drag = null;
+    st.addEventListener('pointerdown', e => {
+      if (e.pointerType !== 'mouse' || e.button !== 0) return;
+      drag = { x: e.clientX, y: e.clientY, sl: st.scrollLeft, sp: st.scrollTop, moved: false };
+    });
+    window.addEventListener('pointermove', e => {
+      if (!drag) return;
+      const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+      if (!drag.moved && Math.abs(dx) + Math.abs(dy) > 4) { drag.moved = true; st.classList.add('is-dragging'); }
+      if (drag.moved) { st.scrollLeft = drag.sl - dx; st.scrollTop = drag.sp - dy; }
+    });
+    window.addEventListener('pointerup', () => {
+      if (drag && drag.moved) dragMoved = true;
+      drag = null;
+      st.classList.remove('is-dragging');
+    });
+    st.addEventListener('click', e => {
+      if (dragMoved) { e.stopPropagation(); e.preventDefault(); dragMoved = false; }
+    }, true);
+    window.addEventListener('resize', () => {
+      const modal = $('#full-table-modal');
+      if (modal && !modal.hidden && V.fit) setZoom(fitScale(), { x: 0, y: 0 });
+    });
+  })();
+
+  /* ---------- 정당 거리 ---------- */
+  function renderParty() {
+    const t = $('#party-distance-table');
+    if (!t) return;
+    let h = '<thead><tr><th class="p-corner" scope="col"></th>'
+      + D.parties.map(p => `<th scope="col" class="p-head">${esc(p)}</th>`).join('') + '</tr></thead><tbody>';
+    D.names.forEach((n, i) => {
+      const row = D.partyMatrix[i];
+      const m = Math.min(...row);
+      h += `<tr${n === '갤 평균' ? ' class="is-mean"' : ''}><th scope="row" class="p-user">${esc(n)}</th>`
+        + row.map(d => `<td class="p-cell${d === m ? ' is-min' : ''}">${d.toFixed(2)}</td>`).join('') + '</tr>';
+    });
+    t.innerHTML = h + '</tbody>';
+  }
+
+  /* ---------- 좌파력 ---------- */
+  function renderLeftist() {
+    const tb = $('#leftist-table-body');
+    if (!tb) return;
+    const P = palette();
+    tb.innerHTML = D.leftist.map(item => {
+      const c = leanColor(item.value, P);
+      const cls = ['l-row'];
+      if (item.rank === '-') cls.push('is-mean');
+      if (item.rank === 1) cls.push('is-top');
+      return `<tr class="${cls.join(' ')}" style="--v:${Math.max(0, Math.min(100, item.value))}%">`
+        + `<td class="c-rank">${item.rank}</td><td class="c-name">${esc(item.name)}</td>`
+        + `<td class="c-val"><span class="l-badge" style="background:${c.bg};color:${c.fg}">${item.value}</span></td></tr>`;
+    }).join('');
+  }
+  function estimatedRank(score, mean, std, total) {
+    if (!std) return Math.round(total / 2);
+    const z = (score - mean) / std;
+    const t = 1 / (1 + 0.2315419 * Math.abs(z));
+    const d = 0.3989423 * Math.exp(-z * z / 2);
+    let prob = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+    if (z > 0) prob = 1 - prob;
+    return Math.min(total, Math.max(1, Math.round((1 - prob) * total)));
+  }
+  function renderEstimated() {
+    const tb = $('#estimated-rank-table-body');
+    if (!tb) return;
+    tb.innerHTML = D.leftist.filter(x => x.rank !== '-').map(x => {
+      const r = estimatedRank(x.value, D.meanLeftist, D.stdLeftist, 1000);
+      return `<tr><td class="c-name">${esc(x.name)}</td><td class="c-est"><strong>${r}등</strong> <span>/ 1000명</span></td></tr>`;
+    }).join('');
+  }
+
+  /* ---------- 이념 분포 (이념별 인원 수만 표시) ---------- */
+  function renderIdeology() {
+    const ul = $('#ideology-list');
+    if (!ul) return;
+    const total = D.participants || 1;
+    const max = Math.max(1, ...D.ideology.map(x => x.count));
+    ul.innerHTML = D.ideology.map(it => {
+      const pct = it.count / total * 100;
+      return `<li class="ideo-row" style="--pct:${pct.toFixed(1)}%;--rel:${(it.count / max * 100).toFixed(1)}%">`
+        + `<div class="ideo-head"><span class="ideo-name">${esc(it.name)}</span>`
+        + `<span class="ideo-count"><b>${it.count}</b>명<small>${pct.toFixed(1)}%</small></span></div>`
+        + `<div class="ideo-track" aria-hidden="true"><span class="ideo-fill"></span></div></li>`;
+    }).join('');
+  }
+
+  /* ---------- 상관계수 ---------- */
+  const AXN = {
+    econ: { label: '경제(평등)', hi: '평등', lo: '시장', left: 1 },
+    dipl: { label: '외교(국가)', hi: '국가', lo: '세계', left: -1 },
+    civil: { label: '시민(자유)', hi: '자유', lo: '권위', left: 1 },
+    soc: { label: '사회(전통)', hi: '전통', lo: '진보', left: -1 }
+  };
+  const fmtR = r => (r < 0 ? '−' : '') + Math.abs(r).toFixed(2);
+  function strength(r) {
+    const a = Math.abs(r);
+    return a < 0.1 ? '거의 없음' : a < 0.3 ? '약한' : a < 0.5 ? '중간' : a < 0.7 ? '뚜렷한' : '강한';
+  }
+  function corrPairs() {
+    const k = D.corr.keys, out = [];
+    for (let i = 0; i < k.length; i++) for (let j = i + 1; j < k.length; j++) out.push({ a: k[i], b: k[j], r: D.corr.r[i][j] });
+    return out.sort((x, y) => Math.abs(y.r) - Math.abs(x.r));
+  }
+  function renderCorr() {
+    if (!D.corr) return;
+    const list = $('#corr-list'), table = $('#corr-table'), note = $('#corr-note');
+    const pairs = corrPairs(), rc = D.corr.rCrit, n = D.corr.n;
+    if (list) {
+      list.innerHTML = pairs.map(p => {
+        const A = AXN[p.a], B = AXN[p.b], st = strength(p.r);
+        let text;
+        if (Math.abs(p.r) < 0.1) text = `${A.hi} 점수와 ${B.hi} 점수 사이에는 뚜렷한 관계가 없어요.`;
+        else if (p.r > 0) text = `${A.hi} 점수가 높은 사람은 ${B.hi} 점수도 높을 가능성이 커요.`;
+        else text = `${A.hi} 점수가 높은 사람은 ${B.hi} 점수가 낮을 가능성이 커요. ${B.lo} 쪽에 가깝다는 뜻이에요.`;
+        const kind = Math.abs(p.r) < 0.1 ? '상관 없음' : `${st} ${p.r > 0 ? '양' : '음'}의 상관`;
+        const chance = Math.abs(p.r) < rc ? `<span class="corr-chance">${n}명 기준으로는 우연일 수 있음</span>` : '';
+        return `<li class="corr-item" data-sign="${p.r >= 0 ? 'pos' : 'neg'}"><div class="corr-pair">${A.label} × ${B.label}</div>`
+          + `<p class="corr-text">${text}</p><div class="corr-meta"><b class="corr-r">${fmtR(p.r)}</b><span class="corr-str">${kind}</span>${chance}</div></li>`;
+      }).join('');
+    }
+    if (table) {
+      const P = palette(), k = D.corr.keys;
+      let h = '<thead><tr><th class="cr-corner" scope="col"></th>' + k.map(x => `<th scope="col">${AXN[x].label}</th>`).join('') + '</tr></thead><tbody>';
+      k.forEach((x, i) => {
+        h += `<tr><th scope="row">${AXN[x].label}</th>`;
+        k.forEach((y, j) => {
+          const r = D.corr.r[i][j];
+          const c = r >= 0 ? mix(P.lmid, P.high, Math.min(1, r)) : mix(P.lmid, P.low, Math.min(1, -r));
+          h += `<td class="cr-cell${i === j ? ' is-self' : ''}" style="background:${rgb(c)};color:${light(c) ? P.inkLight : P.inkDark}">${i === j ? '1' : fmtR(r)}</td>`;
+        });
+        h += '</tr>';
+      });
+      table.innerHTML = h + '</tbody>';
+    }
+    if (note) {
+      const top = pairs[0];
+      const strong = pairs.filter(p => Math.abs(p.r) >= rc);
+      // 평등·세계·자유·진보를 같은 방향으로 맞췄을 때 모두 양(+)이면 한 묶음으로 움직인 것
+      const aligned = strong.length > 0 && strong.every(p => p.r * AXN[p.a].left * AXN[p.b].left > 0);
+      let trend = `이번 분기에는 ${AXN[top.a].hi}와 ${AXN[top.b].hi} 사이의 관계가 가장 뚜렷했고(r = ${fmtR(top.r)}), 6쌍 중 ${strong.length}쌍이 ${n}명 기준으로 우연으로 보기 어려운 수준(|r| ≥ ${rc.toFixed(2)})이었어요.`;
+      if (aligned) trend += ' 그 관계들은 모두 평등·세계·자유·진보가 한쪽으로, 시장·국가·권위·전통이 다른 쪽으로 함께 움직이는 방향이었어요.';
+      note.innerHTML = `<p><b>읽는 법</b> 상관계수(r)는 −1부터 1까지의 값이에요. 1에 가까울수록 한 축이 높을 때 다른 축도 높고, −1에 가까울수록 한 축이 높을 때 다른 축은 낮으며, 0에 가까우면 둘 사이에 뚜렷한 관계가 없다는 뜻이에요.</p>`
+        + `<p><b>요약</b> ${trend}</p>`
+        + `<p class="corr-caution">인원이 ${n}명이라 한두 사람의 결과로도 값이 꽤 달라질 수 있고, 상관은 원인과 결과를 뜻하지 않아요.</p>`;
+    }
+  }
+
+  /* ---------- 가까운 이념 TOP 10 ---------- */
+  let irName = null;
+  function renderIdeoRank(name) {
+    const sel = $('#ir-select'), body = $('#ir-body');
+    if (!sel || !body || !D.ideoRank) return;
+    if (!sel.options.length) sel.innerHTML = D.ideoRank.names.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('');
+    if (name !== undefined) irName = name;
+    if (irName === null || !D.ideoRank.names.includes(irName)) irName = D.ideoRank.names[0];
+    sel.value = irName;
+    const i = D.ideoRank.names.indexOf(irName);
+    body.innerHTML = D.ideoRank.top[i].map(([k, d], r) =>
+      `<tr class="ir-row${r === 0 ? ' is-first' : ''}"><td class="c-rank">${r + 1}</td>`
+      + `<td class="c-ideo-name"><button type="button" class="ir-link" data-ir-ideo="${k}">${esc(D.ideoRank.ideologies[k])}</button></td><td class="c-d">${d.toFixed(2)}</td></tr>`).join('');
+    const label = $('#ir-target');
+    if (label) label.textContent = irName;
+    if ($('#ip-body') && ipIdx !== null) renderIdeoPeople();   // 이념 표에서 고른 사람 표시
+  }
+  function renderIdeoRef() {
+    const t = $('#ir-ref-table');
+    if (!t || !D.ideoRef) return;
+    t.innerHTML = '<thead><tr><th scope="col">이념</th><th scope="col">경제(평등)</th><th scope="col">외교(국가)</th><th scope="col">시민(자유)</th><th scope="col">사회(전통)</th><th scope="col">판정 인원</th></tr></thead><tbody>'
+      + D.ideoRef.map((r, i) => `<tr${r.count ? ' class="has-count"' : ''}><th scope="row"><button type="button" class="ir-link" data-ir-ideo="${i}">${esc(r.name)}</button></th><td>${r.e}</td><td>${r.n}</td><td>${r.l}</td><td>${r.t}</td><td>${r.count ? r.count + '명' : '-'}</td></tr>`).join('')
+      + '</tbody>';
+  }
+
+
+  /* ---------- 이념 → 가까운 국붕이 (전원) ---------- */
+  let ipIdx = null;
+  const normIdeo = t => String(t).toLowerCase().replace(/[\s\-·・\/()]+/g, '');
+  function ideoMatches(q) {
+    const R = D.ideoRank, n = normIdeo(q);
+    if (!n) return [];
+    const exact = R.ideologies.findIndex((k, i) => normIdeo(k) === n || normIdeo(R.en[i]) === n);
+    if (exact >= 0) return [exact];
+    const out = [];
+    R.ideologies.forEach((k, i) => { if (normIdeo(k).includes(n) || normIdeo(R.en[i]).includes(n)) out.push(i); });
+    return out;
+  }
+  function renderIdeoPeople(k) {
+    const body = $('#ip-body'), R = D.ideoRank;
+    if (!body || !R || !R.all) return;
+    if (k !== undefined) ipIdx = k;
+    if (ipIdx === null) { ipIdx = R.ideologies.indexOf(D.meanIdeology); if (ipIdx < 0) ipIdx = 0; }
+    const rows = R.names.map((n, i) => ({ n, d: R.all[i][ipIdx], own: R.pos[i][ipIdx], mean: i === 0, order: i }))
+      .sort((a, b) => a.d - b.d || a.order - b.order);
+    const people = rows.filter(r => !r.mean);
+    body.innerHTML = rows.map(r => {
+      const rank = r.mean ? '-' : 1 + people.filter(x => x.d < r.d).length;   // 거리가 같으면 같은 순위
+      const cls = ['ip-row'];
+      if (r.mean) cls.push('is-mean');
+      if (r.own === 1) cls.push('is-own');
+      if (r.n === irName) cls.push('is-picked');
+      return `<tr class="${cls.join(' ')}"><td class="c-rank">${rank}</td>`
+        + `<td class="c-name"><button type="button" class="ir-link" data-ir-person="${esc(r.n)}">${esc(r.n)}</button></td>`
+        + `<td class="c-d">${r.d.toFixed(2)}</td><td class="c-own">${r.own}위</td></tr>`;
+    }).join('');
+    const ref = D.ideoRef && D.ideoRef[ipIdx];
+    const t = $('#ip-target'), c = $('#ip-coords');
+    if (t) t.textContent = R.ideologies[ipIdx];
+    if (c && ref) c.textContent = `대표 좌표: 경제(평등) ${ref.e} · 외교(국가) ${ref.n} · 시민(자유) ${ref.l} · 사회(전통) ${ref.t}`;
+  }
+  function selectIdeo(k, scroll) {
+    const msg = $('#ip-msg'), input = $('#ip-input');
+    if (msg) msg.textContent = '';
+    if (input) input.value = D.ideoRank.ideologies[k];
+    renderIdeoPeople(k);
+    if (scroll) { const b = $('#ip-block'); if (b) b.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  }
+  /* ---------- 콤보박스 (검색창을 누르면 입력과 닮은 항목만, 옆의 ▾를 누르면 전체) ----------
+     이념 검색과 닉네임 검색이 같이 씁니다. */
+  function makeCombo(o) {
+    const S = { open: false, items: [], active: -1, all: false };
+    const { form, input, list, arrow, msg } = o;
+    const field = form.querySelector('.cb-field');
+    const everything = () => Array.from({ length: o.count() }, (_, i) => i);
+    function scored(q) {                      // [순위, 항목] — 0 정확히 같음, 1 앞부분 일치, 2 포함 (두 번째 이름은 3, 4)
+      const n = normIdeo(q);
+      return everything().map(i => {
+        let best = -1;
+        o.keys(i).forEach((key, t) => {
+          if (!key) return;
+          const k = normIdeo(key);
+          const sc = k === n ? 0 : k.startsWith(n) ? t * 2 + 1 : k.includes(n) ? t * 2 + 2 : -1;
+          if (sc >= 0 && (best < 0 || sc < best)) best = sc;
+        });
+        return [best, i];
+      }).filter(x => x[0] >= 0).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    }
+    const filtered = q => normIdeo(q) ? scored(q).map(x => x[1]) : everything();
+    function mark(name, q) {
+      const t = String(q || '').trim();
+      const at = t ? name.toLowerCase().indexOf(t.toLowerCase()) : -1;
+      if (at < 0) return esc(name);
+      return esc(name.slice(0, at)) + '<mark>' + esc(name.slice(at, at + t.length)) + '</mark>' + esc(name.slice(at + t.length));
+    }
+    function render(q) {
+      const n = normIdeo(q || ''), cur = o.current();
+      list.innerHTML = S.items.length ? S.items.map((k, j) => {
+        const keys = o.keys(k);
+        const viaSecond = !S.all && n && keys[1] && !normIdeo(keys[0]).includes(n);
+        return `<li role="option" id="${o.prefix}-opt-${k}" data-k="${k}" class="cb-opt${j === S.active ? ' is-active' : ''}${k === cur ? ' is-current' : ''}" aria-selected="${k === cur}">`
+          + `<span class="cb-name">${S.all ? esc(keys[0]) : mark(keys[0], q)}</span>`
+          + (viaSecond ? `<span class="cb-en">${esc(keys[1])}</span>` : '')
+          + (o.extra ? o.extra(k) : '') + '</li>';
+      }).join('') : `<li class="cb-empty" role="presentation">일치하는 ${o.what}이 없어요. ▾를 눌러 전체 목록을 볼 수 있어요.</li>`;
+      if (S.active >= 0 && S.items[S.active] !== undefined) input.setAttribute('aria-activedescendant', `${o.prefix}-opt-${S.items[S.active]}`);
+      else input.removeAttribute('aria-activedescendant');
+      const act = list.querySelector('.is-active');
+      if (act) act.scrollIntoView({ block: 'nearest' });
+    }
+    function open(all) {
+      S.all = !!all;
+      const q = S.all ? '' : input.value;
+      S.items = S.all ? everything() : filtered(q);
+      S.active = S.all ? Math.max(0, S.items.indexOf(o.current())) : (S.items.length ? 0 : -1);
+      S.open = true;
+      list.hidden = false;
+      input.setAttribute('aria-expanded', 'true');
+      if (arrow) arrow.setAttribute('aria-expanded', 'true');
+      render(q);
+    }
+    function close() {
+      S.open = false; S.active = -1; list.hidden = true;
+      input.setAttribute('aria-expanded', 'false');
+      input.removeAttribute('aria-activedescendant');
+      if (arrow) arrow.setAttribute('aria-expanded', 'false');
+    }
+    function pick(k) { close(); msg.textContent = ''; input.value = o.keys(k)[0]; o.pick(k); }
+    input.addEventListener('focus', () => { if (!S.open) open(false); input.select(); });
+    input.addEventListener('click', () => { if (!S.open) open(false); });
+    input.addEventListener('input', () => { msg.textContent = ''; open(false); });
+    input.addEventListener('keydown', e => {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (!S.open) { open(false); return; }
+        if (!S.items.length) return;
+        S.active = (S.active + (e.key === 'ArrowDown' ? 1 : -1) + S.items.length) % S.items.length;
+        render(S.all ? '' : input.value);
+      } else if (e.key === 'Enter' && S.open && S.active >= 0) {
+        e.preventDefault(); pick(S.items[S.active]);
+      } else if (e.key === 'Escape' && S.open) {
+        e.preventDefault(); e.stopPropagation(); close();
+      } else if (e.key === 'Tab') close();
+    });
+    if (arrow) {
+      arrow.addEventListener('mousedown', e => e.preventDefault());     // 입력창 포커스 유지
+      arrow.addEventListener('click', () => {
+        if (S.open && S.all) { close(); return; }
+        open(true);
+        input.focus({ preventScroll: true });
+      });
+    }
+    list.addEventListener('mousedown', e => e.preventDefault());
+    list.addEventListener('click', e => { const li = e.target.closest('[data-k]'); if (li) pick(+li.dataset.k); });
+    document.addEventListener('pointerdown', e => { if (S.open && field && !field.contains(e.target)) close(); });
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const q = input.value.trim();
+      if (!q) { open(true); input.focus({ preventScroll: true }); return; }
+      const sc = scored(q);
+      const hits = sc.length && sc[0][0] === 0 ? [sc[0][1]] : sc.map(x => x[1]);
+      if (hits.length === 1) pick(hits[0]);
+      else if (!hits.length) { close(); msg.textContent = `'${q}'와 일치하는 ${o.what}이 없어요. ▾를 눌러 전체 목록에서 고를 수 있어요.`; }
+      else { msg.textContent = o.found(hits.length); open(false); input.focus({ preventScroll: true }); }
+    });
+    return { close };
+  }
+  function bindIdeoSearch() {
+    const form = $('#ip-search');
+    if (!form || !D.ideoRank) return;
+    const R = D.ideoRank;
+    makeCombo({
+      form, input: $('#ip-input'), list: $('#ip-options'), arrow: $('#ip-arrow'), msg: $('#ip-msg'), prefix: 'ip', what: '이념',
+      count: () => R.ideologies.length,
+      keys: i => [R.ideologies[i], R.en[i]],
+      current: () => (ipIdx === null ? -1 : ipIdx),
+      extra: i => { const c = D.ideoRef && D.ideoRef[i] ? D.ideoRef[i].count : 0; return c ? `<small class="cb-cnt">${c}명 판정</small>` : ''; },
+      found: n => `${n}개 이념이 찾아졌어요. 목록에서 고르세요.`,
+      pick: i => selectIdeo(i, false)
+    });
+  }
+  document.addEventListener('click', e => {
+    const pk = e.target.closest('[data-ideo-pick]');
+    if (pk) { selectIdeo(+pk.dataset.ideoPick, false); return; }
+    const li = e.target.closest('[data-ir-ideo]');
+    if (li) { selectIdeo(+li.dataset.irIdeo, true); return; }
+    const lp = e.target.closest('[data-ir-person]');
+    if (lp) {
+      renderIdeoRank(lp.dataset.irPerson);
+      const sel = $('#ir-select');
+      if (sel) sel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+
+  /* ---------- 분기 이동 (site/quarters.js 의 목록, 없으면 만들 때의 목록) ---------- */
+  function renderQuarterNav() {
+    const box = $('#q-pages');
+    if (!box) return;
+    const list = (Array.isArray(window.QUARTERS) && window.QUARTERS.length ? window.QUARTERS : window.QUARTERS_BAKED) || [];
+    const cur = box.dataset.current;
+    const i = list.findIndex(q => `${q.year}-${q.q}` === cur);
+    const prev = i > 0 ? list[i - 1] : null, next = i >= 0 && i < list.length - 1 ? list[i + 1] : null;
+    let h = prev ? `<a class="q-step q-prev" href="${esc(prev.file)}" data-q title="${esc(prev.label)}">◀ 이전 분기</a>` : '<span class="q-step q-prev q-off" aria-hidden="true">◀ 이전 분기</span>';
+    let year = null;
+    list.forEach(q => {
+      if (q.year !== year) { year = q.year; h += `<span class="q-year">${q.year}년</span>`; }
+      h += `${q.year}-${q.q}` === cur
+        ? `<strong aria-current="page" title="${esc(q.label)}">${q.q}분기</strong>`
+        : `<a href="${esc(q.file)}" data-q title="${esc(q.label)}">${q.q}분기</a>`;
+    });
+    h += '<span class="q-break" aria-hidden="true"></span>';
+    h += next ? `<a class="q-step q-next" href="${esc(next.file)}" data-q title="${esc(next.label)}">다음 분기 ▶</a>` : '<span class="q-step q-next q-off" aria-hidden="true">다음 분기 ▶</span>';
+    box.innerHTML = h;
+  }
+  // 분기를 옮겨도 보던 탭을 그대로 열기
+  document.addEventListener('click', e => {
+    const a = e.target.closest('#q-pages a[data-q]');
+    if (a && location.hash) a.setAttribute('href', a.getAttribute('href').split('#')[0] + location.hash);
+  });
+
+  /* ---------- 닉네임 검색 (성향 거리) ---------- */
+  function bindSearch() {
+    const form = $('#name-search');
+    if (!form) return;
+    makeCombo({
+      form, input: $('#name-search-input'), list: $('#name-search-options'), arrow: $('#name-search-arrow'), msg: $('#name-search-msg'), prefix: 'ns', what: '닉네임',
+      count: () => D.names.length,
+      keys: i => [D.names[i]],
+      current: () => (currentDetail === null ? -1 : D.names.indexOf(currentDetail)),
+      found: n => `${n}명이 찾아졌어요. 목록에서 고르세요.`,
+      pick: i => { switchTab('distance', { silent: true }); showDetail(D.names[i]); }
+    });
+  }
+
+  /* ---------- 표를 이미지(PNG)로 저장 ---------- */
+  function rgba(str) {
+    str = String(str || '').trim();
+    if (!str || str === 'transparent') return [0, 0, 0, 0];
+    let m = str.match(/^color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)(?:\s*\/\s*([\d.]+)(%?))?\)/);
+    if (m) return [m[1] * 255, m[2] * 255, m[3] * 255, m[4] === undefined ? 1 : (m[5] ? m[4] / 100 : +m[4])];
+    m = str.match(/rgba?\(([^)]+)\)/);
+    if (!m) return [0, 0, 0, 0];
+    const v = m[1].split(/[\s,/]+/).filter(Boolean);
+    const a = v[3] === undefined ? 1 : (v[3].endsWith('%') ? parseFloat(v[3]) / 100 : +v[3]);
+    return [+v[0], +v[1], +v[2], a];
+  }
+  const over = (top, base) => [0, 1, 2].map(i => Math.round(top[i] * top[3] + base[i] * (1 - top[3])));
+  const css = a => `rgb(${a[0]}, ${a[1]}, ${a[2]})`;
+  function surfaceOf(el) {
+    const chain = [];
+    for (let e = el; e && e.nodeType === 1; e = e.parentElement) chain.push(e);
+    let base = [255, 255, 255];
+    for (let i = chain.length - 1; i >= 0; i--) {
+      const b = rgba(getComputedStyle(chain[i]).backgroundColor);
+      if (b[3] > 0) base = over(b, base);
+    }
+    return base;
+  }
+  async function saveTableImage(table, title, btn) {
+    if (!table || !table.rows.length) return;
+    try { await document.fonts.ready; } catch (e) {}
+    const base = surfaceOf(table);
+    const tcs = getComputedStyle(table);
+    const family = tcs.fontFamily, ink = over(rgba(tcs.color), base);
+    const FS = 13, PADX = 12, ROWH = 32, M = 28, TITLE = 66;
+    const cv = document.createElement('canvas'), ctx = cv.getContext('2d');
+    const grid = Array.from(table.rows).map(tr => Array.from(tr.cells).map(td => {
+      const cs = getComputedStyle(td), badge = td.querySelector('.l-badge');
+      const bc = badge ? getComputedStyle(badge) : null;
+      return {
+        text: td.textContent.replace(/\s+/g, ' ').trim(),
+        bg: rgba(cs.backgroundColor), fg: rgba(cs.color),
+        bold: td.tagName === 'TH' || parseInt(cs.fontWeight, 10) >= 600,
+        align: /left|start/.test(cs.textAlign) ? 'left' : /right|end/.test(cs.textAlign) ? 'right' : 'center',
+        badge: bc ? { bg: rgba(bc.backgroundColor), fg: rgba(bc.color) } : null
+      };
+    }));
+    const nCols = Math.max(...grid.map(r => r.length));
+    const widths = new Array(nCols).fill(52);
+    grid.forEach(r => r.forEach((c, j) => {
+      ctx.font = `${c.bold ? 700 : 400} ${FS}px ${family}`;
+      widths[j] = Math.max(widths[j], Math.ceil(ctx.measureText(c.text).width + PADX * 2 + (c.badge ? 18 : 0)));
+    }));
+    const tableW = widths.reduce((x, y) => x + y, 0);
+    const W = Math.max(M * 2 + tableW, 420), H = M + TITLE + ROWH * grid.length + M, S = 2;
+    cv.width = W * S; cv.height = H * S; ctx.scale(S, S);
+    ctx.fillStyle = css(base); ctx.fillRect(0, 0, W, H);
+    ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left'; ctx.fillStyle = css(ink);
+    ctx.font = `700 20px ${family}`; ctx.fillText(title, M, M + 20);
+    ctx.fillStyle = css(mix(base, ink, 0.6)); ctx.font = `400 12px ${family}`;
+    ctx.fillText(`국민의 정부 갤러리 8values 종합 | ${D.period}`, M, M + 42);
+    const line = css(mix(base, ink, 0.16));
+    let y = M + TITLE;
+    grid.forEach(r => {
+      let x = M;
+      r.forEach((c, j) => {
+        const w = widths[j], bg = over(c.bg, base);
+        ctx.fillStyle = css(bg); ctx.fillRect(x, y, w, ROWH);
+        ctx.strokeStyle = line; ctx.lineWidth = 1; ctx.strokeRect(x + 0.5, y + 0.5, w, ROWH);
+        ctx.font = `${c.bold ? 700 : 400} ${FS}px ${family}`;
+        ctx.textBaseline = 'middle';
+        let tx = c.align === 'left' ? x + PADX : c.align === 'right' ? x + w - PADX : x + w / 2;
+        if (c.badge) {
+          const bw = ctx.measureText(c.text).width + 18, bx = x + w / 2 - bw / 2, bb = over(c.badge.bg, bg);
+          ctx.fillStyle = css(bb);
+          if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(bx, y + 6, bw, ROWH - 12, 6); ctx.fill(); } else ctx.fillRect(bx, y + 6, bw, ROWH - 12);
+          ctx.fillStyle = css(over(c.badge.fg, bb)); ctx.textAlign = 'center'; tx = x + w / 2;
+        } else {
+          ctx.fillStyle = css(over(c.fg, bg)); ctx.textAlign = c.align;
+        }
+        ctx.fillText(c.text, tx, y + ROWH / 2 + 1);
+        x += w;
+      });
+      y += ROWH;
+    });
+    const file = `국붕갤_8values_${title}_${D.period}.png`.replace(/[\\/:*?"<>|\s]+/g, '_');
+    cv.toBlob(blob => {
+      if (!blob) return;
+      const url = URL.createObjectURL(blob), a = document.createElement('a');
+      a.href = url; a.download = file; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+      if (btn) {
+        const label = btn.querySelector('span') || btn, old = label.textContent;
+        label.textContent = '저장했어요';
+        setTimeout(() => { label.textContent = old; }, 1600);
+      }
+    }, 'image/png');
+  }
+
+  /* ---------- 8values 식 축 막대 ---------- */
+  const TIERS = {
+    // 8values 한국어판 results.html 의 표기 그대로
+    econ: ['공산주의적', '사회주의적', '사회적', '중도적', '시장적', '자본주의적', '자유방임주의적'],
+    dipl: ['세계시민주의', '국제주의', '평화적', '균형적', '애국적', '민족주의적', '국수주의적'],
+    govt: ['아나키즘적', '자유지상주의적', '자유주의적', '온건적', '국가통제주의적', '권위주의적', '전체주의적'],
+    scty: ['혁명적', '매우 진보적', '진보적', '중도적', '전통적', '매우 전통적', '반동적']
+  };
+  function tier(v, arr) {
+    if (v > 90) return arr[0]; if (v > 75) return arr[1]; if (v > 60) return arr[2];
+    if (v >= 40) return arr[3]; if (v >= 25) return arr[4]; if (v >= 10) return arr[5]; return arr[6];
+  }
+  function axisData(s) {
+    const e = s['경제(평등)'], n = s['외교(국가)'], l = s['시민(자유)'], t = s['사회(전통)'];
+    return [
+      { key: 'econ', name: '경제', L: '평등', R: '시장', lv: e, tier: tier(e, TIERS.econ) },
+      { key: 'dipl', name: '외교', L: '국가', R: '세계', lv: n, tier: tier(100 - n, TIERS.dipl) },
+      { key: 'civil', name: '시민', L: '자유', R: '권위', lv: l, tier: tier(l, TIERS.govt) },
+      { key: 'soc', name: '사회', L: '전통', R: '진보', lv: t, tier: tier(100 - t, TIERS.scty) }
+    ];
+  }
+  function renderAxisBars() {
+    $$('[data-axis-bars]').forEach(box => {
+      box.innerHTML = axisData(D.mean).map(a => {
+        const l = a.lv, r = 100 - a.lv;
+        return `<div class="ax ax-${a.key}"><div class="ax-top"><span class="ax-name">${a.name} 축</span><span class="ax-tier">${a.tier}</span></div>`
+          + `<div class="ax-bar"><span class="ax-seg ax-l" style="width:${l}%"><em>${a.L}</em> <b>${l.toFixed(1)}%</b></span>`
+          + `<span class="ax-seg ax-r" style="width:${r}%"><b>${r.toFixed(1)}%</b> <em>${a.R}</em></span></div></div>`;
+      }).join('');
+    });
+    $$('[data-tier]').forEach(el => {
+      const a = axisData(D.mean).find(x => x.key === el.dataset.tier);
+      if (a) el.textContent = a.tier;
+    });
+  }
+
+  /* ---------- 갤 평균 눈금자 (집계값만 표시) ---------- */
+  function renderRulers() {
+    $$('[data-axis-rulers]').forEach(box => {
+      box.innerHTML = axisData(D.mean).map(a => {
+        const l = a.lv, r = 100 - a.lv;
+        return `<div class="ru ru-${a.key}"><div class="ru-top"><span class="ru-name">${a.name} 축</span><span class="ru-tier">${a.tier}</span></div>`
+          + `<div class="ru-scale" style="--pos:${r.toFixed(1)}%" role="img" aria-label="${a.L} ${l.toFixed(1)}%, ${a.R} ${r.toFixed(1)}%">`
+          + `<span class="ru-pin" aria-hidden="true"></span>`
+          + `<span class="ru-end ru-l">${a.L} <b>${l.toFixed(1)}</b></span><span class="ru-end ru-r"><b>${r.toFixed(1)}</b> ${a.R}</span></div></div>`;
+      }).join('');
+    });
+  }
+
+  /* ---------- 히스토그램 ---------- */
+  let charts = [];
+  function renderCharts() {
+    if (typeof Chart === 'undefined') return;
+    charts.forEach(c => c.destroy());
+    charts = [];
+    const font = getComputedStyle(document.body).fontFamily;
+    const grid = cssVar('--chart-grid', 'rgba(0,0,0,.08)');
+    const tick = cssVar('--chart-tick', '#6b7280');
+    Object.keys(D.hist).forEach(key => {
+      const cv = document.getElementById('chart' + key);
+      if (!cv) return;
+      const color = cssVar('--hist-' + key.toLowerCase(), cssVar('--chart-bar', '#60a5fa'));
+      const rotate = key === 'Society' || key === 'Leftist';
+      charts.push(new Chart(cv, {
+        type: 'bar',
+        data: {
+          labels: D.hist[key].labels,
+          datasets: [{ data: D.hist[key].data, backgroundColor: color, borderColor: cssVar('--chart-gap', '#ffffff'), borderWidth: 1, barPercentage: 1, categoryPercentage: 1, borderRadius: parseFloat(cssVar('--chart-radius', '0')) || 0 }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false, animation: false,
+          scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 1, color: tick, font: { family: font } }, grid: { color: grid }, border: { color: grid } },
+            x: { grid: { display: false }, border: { color: grid }, ticks: { color: tick, font: { family: font, size: rotate ? 9 : 10 }, maxRotation: rotate ? 45 : 50, minRotation: rotate ? 45 : 0 } }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: cssVar('--chart-tip-bg', '#111827'), titleColor: cssVar('--chart-tip-fg', '#fff'), bodyColor: cssVar('--chart-tip-fg', '#fff'),
+              titleFont: { family: font }, bodyFont: { family: font },
+              callbacks: { title: ctx => '구간: ' + ctx[0].label, label: ctx => '빈도수: ' + ctx.parsed.y + '명' }
+            }
+          }
+        }
+      }));
+    });
+  }
+
+  /* ---------- 테마 ---------- */
+  const THEME_KEY = '8values-theme';
+  function storedTheme() { try { return localStorage.getItem(THEME_KEY); } catch (e) { return null; } }
+  function updateToggles(t) {
+    $$('[data-theme-toggle]').forEach(b => {
+      b.setAttribute('aria-pressed', t === 'dark' ? 'true' : 'false');
+      const label = $('[data-theme-label]', b);
+      if (label) label.textContent = t === 'dark' ? (b.dataset.labelDark || '라이트 모드') : (b.dataset.labelLight || '다크 모드');
+    });
+  }
+  function repaint() {
+    renderMatrix();
+    renderDetail();
+    renderLeftist();
+    renderCorr();
+    renderCharts();
+    const modal = $('#full-table-modal');
+    if (modal && !modal.hidden) showFullTable(true);
+  }
+  function setTheme(t, persist) {
+    root.setAttribute('data-theme', t);
+    if (persist) { try { localStorage.setItem(THEME_KEY, t); } catch (e) {} }
+    updateToggles(t);
+    repaint();
+  }
+
+  /* ---------- 이벤트 ---------- */
+  document.addEventListener('click', e => {
+    const tab = e.target.closest('[data-tab]');
+    if (tab) { switchTab(tab.dataset.tab); return; }
+    const go = e.target.closest('[data-goto]');
+    if (go) { e.preventDefault(); switchTab(go.dataset.goto, { scroll: true }); return; }
+    const th = e.target.closest('#distance-table [data-name], #full-table-container [data-name]');
+    if (th) { closeFullTable(); switchTab('distance', { silent: true }); showDetail(th.dataset.name); return; }
+    const toggle = e.target.closest('[data-theme-toggle]');
+    if (toggle) { setTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark', true); return; }
+    const sv = e.target.closest('[data-save-table]');
+    if (sv) {
+      const el = $(sv.dataset.saveTable);
+      const table = el && (el.tagName === 'TABLE' ? el : el.closest('table'));
+      let title = sv.dataset.title || '표';
+      if (sv.dataset.title === 'detail' && currentDetail) title = `${currentDetail}${currentDetail === '갤 평균' ? '과' : ' 님과'} 가까운 순위`;
+      if (sv.dataset.title === 'ir') title = `${irName} 가까운 이념 TOP 10`;
+      if (sv.dataset.title === 'ip') title = `${D.ideoRank.ideologies[ipIdx]} 기준 가까운 국붕이`;
+      saveTableImage(table, title, sv);
+      return;
+    }
+    const pick = e.target.closest('[data-name-pick]');
+    if (pick) { $('#name-search-msg').textContent = ''; switchTab('distance', { silent: true }); showDetail(pick.dataset.namePick); return; }
+    const zb = e.target.closest('[data-zoom]');
+    if (zb) {
+      const k = zb.dataset.zoom;
+      if (k === 'in') zoomBy(1.25);
+      else if (k === 'out') zoomBy(1 / 1.25);
+      else if (k === 'fit') { V.fit = true; setZoom(fitScale(), { x: 0, y: 0 }); stageEl().scrollLeft = 0; stageEl().scrollTop = 0; }
+      else if (k === 'actual') { V.fit = false; setZoom(1); }
+      return;
+    }
+    const act = e.target.closest('[data-action]');
+    if (!act) return;
+    const a = act.dataset.action;
+    if (a === 'full-table') showFullTable(false);
+    else if (a === 'close-full') closeFullTable();
+    else if (a === 'back-to-matrix') showMatrixView();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeFullTable();
+    const modalOpen = $('#full-table-modal') && !$('#full-table-modal').hidden;
+    if (modalOpen && (e.key === '+' || e.key === '=')) { e.preventDefault(); zoomBy(1.25); }
+    if (modalOpen && e.key === '-') { e.preventDefault(); zoomBy(1 / 1.25); }
+    if (modalOpen && e.key === '0') { e.preventDefault(); V.fit = true; setZoom(fitScale(), { x: 0, y: 0 }); }
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('[data-name]')) {
+      e.preventDefault();
+      e.target.click();
+    }
+  });
+  const modal = $('#full-table-modal');
+  if (modal) modal.addEventListener('click', e => { if (e.target === modal) closeFullTable(); });
+  window.addEventListener('hashchange', () => {
+    const h = (location.hash || '').replace('#', '');
+    if (TAB_IDS.includes(h)) switchTab(h, { silent: true });
+  });
+  try {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', ev => {
+      if (!storedTheme()) setTheme(ev.matches ? 'dark' : 'light', false);
+    });
+  } catch (e) {}
+
+  /* ---------- 시작 ---------- */
+  document.addEventListener('DOMContentLoaded', () => {
+    updateToggles(root.getAttribute('data-theme') || 'light');
+    renderParty();
+    renderEstimated();
+    renderIdeology();
+    renderAxisBars();
+    renderRulers();
+    bindSearch();
+    renderQuarterNav();
+    renderIdeoRank();
+    renderIdeoRef();
+    bindIdeoSearch();
+    renderIdeoPeople();
+    const irSel = $('#ir-select');
+    if (irSel) irSel.addEventListener('change', () => renderIdeoRank(irSel.value));
+    repaint();
+    const hash = (location.hash || '').replace('#', '');
+    switchTab(TAB_IDS.includes(hash) ? hash : TAB_IDS[0], { silent: true });
+  });
+})();
+
+</script>
+</body>
+</html>
