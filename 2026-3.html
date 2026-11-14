@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta name="robots" content="noindex, nofollow">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>국민의 정부 갤러리 8values 종합 - 2026년도 3분기</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f3f4f6;
+        }
+        ::-webkit-scrollbar { width: 8px; height: 8px;}
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .tab-content { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .shortcut-card { transition: all 0.2s ease-in-out; }
+        .shortcut-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .table-container {
+            max-height: 500px;
+            overflow-y: auto;
+            overflow-x: auto;
+            border: 1px solid #e5e7eb;
+        }
+        .fixed-width-table th, 
+        .fixed-width-table td {
+            min-width: 106px;
+            width: 106px;
+            text-align: center;
+            white-space: nowrap;
+            padding: 8px;
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased min-h-screen flex flex-col">
+
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="py-6 border-b border-gray-200">
+                <h1 class="text-2xl md:text-3xl font-black text-center text-blue-800 tracking-tight">
+                    국민의 정부 갤러리 8values 종합
+                    <span class="block text-sm md:text-base font-medium text-gray-500 mt-1">- 2026년도 3분기 -</span>
+                </h1>
+            </div>
+            
+            <nav class="flex overflow-x-auto py-2 -mb-px justify-center sm:justify-start" aria-label="Tabs">
+                <button onclick="switchTab('main')" id="tab-main" class="tab-btn whitespace-nowrap py-4 px-6 border-b-2 font-bold text-sm sm:text-base transition-colors duration-200 text-blue-600 border-blue-600 focus:outline-none">메인화면</button>
+                <button onclick="switchTab('distance')" id="tab-distance" class="tab-btn whitespace-nowrap py-4 px-6 border-b-2 border-transparent font-medium text-sm sm:text-base text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors duration-200 focus:outline-none">성향거리</button>
+                <button onclick="switchTab('leftist')" id="tab-leftist" class="tab-btn whitespace-nowrap py-4 px-6 border-b-2 border-transparent font-medium text-sm sm:text-base text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors duration-200 focus:outline-none">좌파력</button>
+                <button onclick="switchTab('party')" id="tab-party" class="tab-btn whitespace-nowrap py-4 px-6 border-b-2 border-transparent font-medium text-sm sm:text-base text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors duration-200 focus:outline-none">정당과의 거리</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        <!-- Tab 1: Main -->
+        <section id="content-main" class="tab-content active">
+            <div class="bg-white rounded-2xl shadow-sm p-6 sm:p-10 mb-8 border border-gray-100">
+                <h2 class="text-xl sm:text-2xl font-bold mb-4 text-gray-800">환영합니다!</h2>
+                <p class="text-gray-600 mb-6 leading-relaxed">
+                    2026년 3분기 국민의 정부 갤러리 이용자들의 8values 정치 성향 테스트 결과를 종합한 페이지입니다.<br class="hidden sm:block">
+                    아래 바로가기를 통해 다양한 분석 결과를 확인해 보세요.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <button onclick="switchTab('distance')" class="shortcut-card text-left bg-gradient-to-br from-indigo-50 to-blue-50 p-6 rounded-xl border border-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4 text-blue-600"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg></div>
+                        <h3 class="text-lg font-bold text-gray-800 mb-2">성향거리 확인하기 &rarr;</h3>
+                        <p class="text-sm text-gray-500">갤러리 평균과 나의 성향 거리를 비교 분석합니다.</p>
+                    </button>
+                    <button onclick="switchTab('leftist')" class="shortcut-card text-left bg-gradient-to-br from-red-50 to-pink-50 p-6 rounded-xl border border-red-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                        <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4 text-red-600"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg></div>
+                        <h3 class="text-lg font-bold text-gray-800 mb-2">좌파력 랭킹 &rarr;</h3>
+                        <p class="text-sm text-gray-500">누가 가장 좌파적인지 척도를 통해 알아봅니다.</p>
+                    </button>
+                    <button onclick="switchTab('party')" class="shortcut-card text-left bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-xl border border-green-100 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4 text-green-600"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg></div>
+                        <h3 class="text-lg font-bold text-gray-800 mb-2">정당과의 거리 &rarr;</h3>
+                        <p class="text-sm text-gray-500">주요 정당들의 성향과 나의 위치를 대조해 봅니다.</p>
+                    </button>
+                </div>
+                <div class="mt-8 pt-6 border-t border-gray-100 flex items-center justify-center sm:justify-start space-x-3">
+                    <span class="flex h-3 w-3 relative">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+                    </span>
+                    <p class="text-lg font-medium text-gray-700">참여한 국붕이 수 : <span class="font-bold text-blue-600 text-xl mx-1" id="participant-count">18</span>명</p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm p-6 sm:p-10 mb-8 border border-gray-100">
+                <h3 class="text-xl font-bold mb-4 text-gray-800 border-b pb-2">갤러리 평균 8values</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-center border-collapse border border-gray-200">
+                        <thead>
+                            <tr class="bg-gray-50">
+                                <th class="border border-gray-200 p-3 font-semibold text-gray-700">구분</th>
+                                <th class="border border-gray-200 p-3 font-semibold text-red-600">경제(평등)</th>
+                                <th class="border border-gray-200 p-3 font-semibold text-blue-600">외교(국가)</th>
+                                <th class="border border-gray-200 p-3 font-semibold text-yellow-600">시민(자유)</th>
+                                <th class="border border-gray-200 p-3 font-semibold text-green-600">사회(전통)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="border border-gray-200 p-3 font-bold text-gray-800 bg-gray-50">갤 평균</td>
+                                <td class="border border-gray-200 p-3 text-gray-700">67.72</td>
+                                <td class="border border-gray-200 p-3 text-gray-700">43.93</td>
+                                <td class="border border-gray-200 p-3 text-gray-700">54.63</td>
+                                <td class="border border-gray-200 p-3 text-gray-700">34.72</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-4 text-right">
+                    <a href="https://8values-ko.github.io/results.html?e=67.7&d=56.1&g=54.6&s=65.3" target="_blank" class="text-blue-600 font-bold hover:underline hover:text-blue-800 transition-colors">
+                        평균 8values 확인하기 &rarr;
+                    </a>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm p-6 sm:p-10 border border-gray-100">
+                <h3 class="text-xl font-bold mb-6 text-gray-800 border-b pb-2">축별 성향 분포</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="flex flex-col items-center w-full">
+                        <h4 class="text-lg font-semibold text-gray-700 mb-3 text-red-600">경제(평등) 분포</h4>
+                        <div class="w-full h-64 relative"><canvas id="chartEconomy"></canvas></div>
+                    </div>
+                    <div class="flex flex-col items-center w-full">
+                        <h4 class="text-lg font-semibold text-gray-700 mb-3 text-blue-600">외교(국가) 분포</h4>
+                        <div class="w-full h-64 relative"><canvas id="chartDiplomacy"></canvas></div>
+                    </div>
+                    <div class="flex flex-col items-center w-full">
+                        <h4 class="text-lg font-semibold text-gray-700 mb-3 text-yellow-600">시민(자유) 분포</h4>
+                        <div class="w-full h-64 relative"><canvas id="chartCivil"></canvas></div>
+                    </div>
+                    <div class="flex flex-col items-center w-full">
+                        <h4 class="text-lg font-semibold text-gray-700 mb-3 text-green-600">사회(전통) 분포</h4>
+                        <div class="w-full h-64 relative"><canvas id="chartSociety"></canvas></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab 2: Distance -->
+        <section id="content-distance" class="tab-content">
+            <div id="distance-matrix-view" class="bg-white rounded-2xl shadow-sm p-4 sm:p-8 border border-gray-100 flex flex-col w-full transition-opacity duration-300">
+                <h3 class="text-xl font-bold mb-6 text-gray-800 border-b pb-2">국붕이 성향 거리 행렬</h3>
+                <p class="text-sm text-gray-500 mb-4">
+                    ※ 닉네임을 클릭하면 해당 유저 기준으로 가까운 유저 순위를 볼 수 있습니다. 가로/세로로 스크롤하여 확인하세요.
+                </p>
+                
+                <div class="table-container shadow-sm border rounded">
+                    <table class="fixed-width-table w-max" id="distance-table">
+                        <!-- JS로 동적 생성됨 -->
+                    </table>
+                </div>
+
+                <!-- 전체 이미지 보기 버튼 및 범례 -->
+                <div class="mt-6 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6">
+                    <button onclick="showFullTable()" class="flex items-center px-4 py-2 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 rounded-xl transition-all font-bold focus:outline-none shadow-sm">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                        전체 이미지 보기 (한눈에 보기)
+                    </button>
+                    <div class="flex flex-col items-end">
+                        <span class="text-xs font-bold text-gray-500 mb-2">성향 거리 범례</span>
+                        <div class="flex items-center w-48 sm:w-64 h-4 rounded-full border border-gray-200 shadow-inner" style="background: linear-gradient(to right, rgb(167, 218, 172), #ffffff, rgb(246, 114, 128));"></div>
+                        <div class="flex justify-between w-48 sm:w-64 text-[10px] sm:text-xs mt-1 px-1 text-gray-600 font-medium">
+                            <span>가까움</span>
+                            <span>중간</span>
+                            <span>멂</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="distance-detail-view" class="bg-white rounded-2xl shadow-sm p-4 sm:p-8 border border-gray-100 hidden flex-col w-full transition-opacity duration-300">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b pb-4 mb-6 gap-4">
+                    <button onclick="showMatrixView()" class="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-all font-medium focus:outline-none focus:ring-2 focus:ring-gray-300">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                        전체 표로 돌아가기
+                    </button>
+                    <h3 class="text-lg sm:text-xl font-bold text-gray-800"><span id="detail-target-name" class="text-blue-600 font-black"></span><span id="detail-target-suffix"> 님과의 성향 거리</span></h3>
+                </div>
+                
+                <div class="w-full overflow-x-auto">
+                    <table class="w-full text-center border-collapse border border-gray-200 rounded-lg overflow-hidden">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="border border-gray-200 p-3 font-bold text-gray-700 w-16">순위</th>
+                                <th class="border border-gray-200 p-3 font-bold text-gray-700">닉네임</th>
+                                <th class="border border-gray-200 p-3 font-bold text-gray-700 w-24 sm:w-32">거리</th>
+                            </tr>
+                        </thead>
+                        <tbody id="detail-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab 3: Leftist -->
+        <section id="content-leftist" class="tab-content">
+            <div class="bg-white rounded-2xl shadow-sm p-6 sm:p-10 mb-8 border border-gray-100">
+                <h3 class="text-xl sm:text-2xl font-bold text-gray-800 border-b pb-4 mb-6">국붕이 좌파력 랭킹</h3>
+                
+                <div class="grid grid-cols-2 gap-4 mb-8">
+                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-200 text-center">
+                        <p class="text-sm font-medium text-gray-500 mb-1">평균 좌파력</p>
+                        <p class="text-2xl font-black text-gray-800">57.15</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-200 text-center">
+                        <p class="text-sm font-medium text-gray-500 mb-1">표준편차</p>
+                        <p class="text-2xl font-black text-gray-800">17.99</p>
+                    </div>
+                </div>
+
+                <div class="w-full overflow-x-auto mb-10">
+                    <table class="w-full text-center border-collapse border border-gray-200 rounded-lg overflow-hidden">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="border border-gray-200 p-3 font-bold text-gray-700 w-20">순위</th>
+                                <th class="border border-gray-200 p-3 font-bold text-gray-700">닉네임</th>
+                                <th class="border border-gray-200 p-3 font-bold text-gray-700 w-32 sm:w-48">좌파력 (0~100)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leftist-table-body"></tbody>
+                    </table>
+                </div>
+
+                <!-- 1000명 기준 예상 등수 (가상 랭킹) -->
+                <div class="bg-blue-50/50 rounded-xl p-5 border border-blue-100 mb-10 w-full md:w-2/3 lg:w-1/2 mx-auto">
+                    <div class="flex items-center mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
+                        </svg>
+                        <h4 class="text-base font-bold text-gray-800">1000명 기준 가상 랭킹</h4>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-4 leading-relaxed">
+                        현재 갤러리의 평균(<span class="font-semibold text-gray-700">57.15</span>)과 표준편차(<span class="font-semibold text-gray-700">17.99</span>)를 따르는 
+                        정규분포를 가정했을 때, 동일한 성향의 국붕이가 1,000명 있다면 나의 예상 등수입니다. (소수점 반올림)
+                    </p>
+                    <div class="overflow-x-auto bg-white rounded-lg border border-gray-200">
+                        <table class="w-full text-center border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 border-b border-gray-200">
+                                    <th class="p-2 text-xs font-bold text-gray-600">닉네임</th>
+                                    <th class="p-2 text-xs font-bold text-gray-600">예상 등수</th>
+                                </tr>
+                            </thead>
+                            <tbody id="estimated-rank-table-body">
+                                <!-- JS로 동적 생성됨 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <h3 class="text-xl font-bold mb-4 text-gray-800 border-b pb-2 mt-8">좌파력 분포</h3>
+                <div class="w-full h-72 relative"><canvas id="chartLeftist"></canvas></div>
+            </div>
+        </section>
+
+        <!-- Tab 4: Party -->
+        <section id="content-party" class="tab-content">
+             <div class="bg-white rounded-2xl shadow-sm p-6 sm:p-10 border border-gray-100">
+                <h3 class="text-xl font-bold mb-4 text-gray-800 border-b pb-2">정당과의 거리</h3>
+                
+                <!-- 누락되었던 주의사항 복구 -->
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-r-lg">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-yellow-800">주의사항</h3>
+                            <div class="mt-2 text-sm text-yellow-700">
+                                <p>본 자료에 기재된 각 정당의 8values 수치는 공식 데이터가 아니며, AI(Gemini)가 추측한 응답을 바탕으로 검사한 임의의 결과값입니다. 따라서 실제 정당의 성향을 정확히 반영하지 않으므로 참고용으로만 활용해 주시기 바랍니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto w-full">
+                    <table class="w-full text-center border-collapse border border-gray-200" id="party-distance-table">
+                        <!-- JS로 동적 생성됨 -->
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 전체 화면 보기 모달 (이미지 모드) -->
+    <div id="full-table-modal" class="hidden fixed inset-0 z-[100] bg-black bg-opacity-80 overflow-auto p-4 md:p-8">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-max min-w-full relative mx-auto">
+            <!-- sticky 클래스 제거하여 모달 스크롤과 함께 위로 사라짐 -->
+            <div class="flex justify-between items-center mb-4 pb-2 border-b bg-white">
+                <h3 class="text-xl font-bold text-gray-800">성향 거리 전체 한눈에 보기</h3>
+                <button onclick="closeFullTable()" class="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 font-bold rounded-lg transition-colors">
+                    닫기 ✕
+                </button>
+            </div>
+            <!-- 제한 없이 커지는 표가 복제될 영역 -->
+            <div id="full-table-container"></div>
+        </div>
+    </div>
+
+    <footer class="bg-white border-t border-gray-200 mt-auto">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <p class="text-center text-sm text-gray-500">
+                &copy; 2026 국민의 정부 갤러리. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        function switchTab(tabId) {
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('font-bold', 'text-blue-600', 'border-blue-600');
+                btn.classList.add('font-medium', 'text-gray-500', 'border-transparent');
+            });
+
+            document.getElementById(`content-${tabId}`).classList.add('active');
+            
+            const selectedButton = document.getElementById(`tab-${tabId}`);
+            selectedButton.classList.remove('font-medium', 'text-gray-500', 'border-transparent');
+            selectedButton.classList.add('font-bold', 'text-blue-600', 'border-blue-600');
+        }
+
+        const distanceNames = ["갤 평균", "겨우르", "냐뤼링", "하시은", "김두한", "독립변수", "메지로맥퀸", "Hydrasplatling", "더블비앙코", "나카마사이치카", "전재수", "우지챠인레후", "Alfred.M.Landon", "토르쨩", "넌아직어준우승", "까미유", "Ruffin_Debout!", "EPiD여영원하라", "제갈현"];
+        const distanceMatrix = [[0.0, 6.76, 8.16, 45.15, 26.94, 13.69, 56.29, 11.63, 30.0, 5.89, 51.39, 9.97, 5.97, 6.36, 8.83, 4.4, 33.01, 30.62, 29.09], [6.76, 0.0, 12.02, 43.97, 22.99, 15.64, 62.27, 15.54, 35.89, 6.22, 46.0, 13.67, 10.88, 5.85, 15.42, 6.99, 38.19, 24.91, 28.16], [8.16, 12.02, 0.0, 50.33, 32.72, 19.0, 52.6, 13.09, 25.77, 10.65, 54.36, 12.93, 12.06, 12.43, 8.48, 11.19, 31.52, 34.95, 25.06], [45.15, 43.97, 50.33, 0.0, 51.77, 52.37, 91.05, 39.02, 67.3, 41.19, 38.85, 38.34, 45.16, 39.5, 48.25, 43.13, 73.19, 51.94, 70.91], [26.94, 22.99, 32.72, 51.77, 0.0, 22.93, 76.8, 35.73, 53.33, 28.49, 48.6, 33.62, 28.62, 26.29, 34.09, 24.55, 48.79, 11.85, 35.08], [13.69, 15.64, 19.0, 52.37, 22.93, 0.0, 54.98, 23.93, 32.01, 17.84, 59.48, 22.04, 11.28, 17.81, 17.58, 14.65, 27.61, 30.78, 30.83], [56.29, 62.27, 52.6, 91.05, 76.8, 54.98, 0.0, 57.03, 27.11, 59.77, 105.93, 57.82, 53.78, 61.78, 49.24, 59.24, 29.07, 83.43, 60.79], [11.63, 15.54, 13.09, 39.02, 35.73, 23.93, 57.03, 0.0, 30.87, 10.57, 50.36, 2.51, 13.49, 10.56, 10.5, 11.81, 38.41, 38.3, 37.31], [30.0, 35.89, 25.77, 67.3, 53.33, 32.01, 27.11, 30.87, 0.0, 33.1, 78.88, 31.62, 28.27, 35.29, 23.16, 33.26, 17.16, 58.51, 39.13], [5.89, 6.22, 10.65, 41.19, 28.49, 17.84, 59.77, 10.57, 33.1, 0.0, 46.92, 8.73, 8.85, 3.67, 12.68, 7.59, 37.59, 30.57, 31.93], [51.39, 46.0, 54.36, 38.85, 48.6, 59.48, 105.93, 50.36, 78.88, 46.92, 0.0, 49.5, 54.69, 45.54, 58.06, 49.5, 84.08, 40.14, 62.79], [9.97, 13.67, 12.93, 38.34, 33.62, 22.04, 57.82, 2.51, 31.62, 8.73, 49.5, 0.0, 11.66, 8.43, 10.41, 9.96, 38.16, 36.45, 36.92], [5.97, 10.88, 12.06, 45.16, 28.62, 11.28, 53.78, 13.49, 28.27, 8.85, 54.69, 11.66, 0.0, 9.81, 9.64, 8.64, 30.23, 33.81, 32.89], [6.36, 5.85, 12.43, 39.5, 26.29, 17.81, 61.78, 10.56, 35.29, 3.67, 45.54, 8.43, 9.81, 0.0, 13.43, 5.59, 39.11, 28.61, 32.74], [8.83, 15.42, 8.48, 48.25, 34.09, 17.58, 49.24, 10.5, 23.16, 12.68, 58.06, 10.41, 9.64, 13.43, 0.0, 10.8, 28.5, 38.53, 31.38], [4.4, 6.99, 11.19, 43.13, 24.55, 14.65, 59.24, 11.81, 33.26, 7.59, 49.5, 9.96, 8.64, 5.59, 10.8, 0.0, 35.69, 28.4, 30.36], [33.01, 38.19, 31.52, 73.19, 48.79, 27.61, 29.07, 38.41, 17.16, 37.59, 84.08, 38.16, 30.23, 39.11, 28.5, 35.69, 0.0, 56.3, 38.69], [30.62, 24.91, 34.95, 51.94, 11.85, 30.78, 83.43, 38.3, 58.51, 30.57, 40.14, 36.45, 33.81, 28.61, 38.53, 28.4, 56.3, 0.0, 34.42], [29.09, 28.16, 25.06, 70.91, 35.08, 30.83, 60.79, 37.31, 39.13, 31.93, 62.79, 36.92, 32.89, 32.74, 31.38, 30.36, 38.69, 34.42, 0.0]];
+        const partyDistanceNames = ["갤 평균", "겨우르", "냐뤼링", "하시은", "김두한", "독립변수", "메지로맥퀸", "Hydrasplatling", "더블비앙코", "나카마사이치카", "전재수", "우지챠인레후", "Alfred.M.Landon", "토르쨩", "넌아직어준우승", "까미유", "Ruffin_Debout!", "EPiD여영원하라", "제갈현"]; 
+        const parties = ["극우", "극좌", "더불어민주당", "국민의힘", "조국혁신당", "진보당", "개혁신당", "정의당"];
+        const partyDistanceMatrix = [[122.38, 78.97, 8.93, 39.64, 14.67, 35.21, 29.09, 32.86], [116.82, 85.24, 15.33, 35.3, 20.56, 40.27, 31.97, 38.27], [124.86, 76.1, 10.99, 40.89, 16.97, 33.41, 31.83, 30.59], [98.26, 111.69, 49.48, 35.44, 53.51, 76.39, 30.55, 73.79], [115.71, 95.96, 32.58, 46.6, 32.71, 48.34, 49.8, 48.82], [129.86, 76.05, 13.08, 50.31, 12.64, 29.93, 37.09, 28.88], [175.84, 28.96, 48.06, 90.52, 45.86, 32.01, 61.94, 29.14], [120.74, 79.48, 14.3, 36.79, 20.04, 40.76, 20.79, 37.68], [148.91, 52.68, 22.58, 63.7, 22.97, 22.13, 39.76, 16.79], [117.74, 83.32, 13.21, 34.49, 19.84, 40.56, 26.19, 37.87], [71.06, 129.42, 59.83, 18.73, 65.19, 85.92, 55.13, 83.99], [120.1, 80.27, 13.4, 36.47, 19.2, 40.62, 21.01, 37.68], [125.55, 76.56, 6.37, 43.07, 12.17, 33.65, 27.01, 31.06], [116.55, 84.52, 14.34, 34.11, 20.01, 41.42, 26.7, 39.08], [128.94, 71.46, 5.92, 45.07, 10.98, 30.41, 27.85, 27.49], [120.55, 80.95, 11.72, 38.8, 15.89, 37.04, 29.67, 35.14], [154.79, 50.2, 25.24, 71.43, 21.47, 10.07, 48.55, 6.79], [106.11, 104.02, 38.14, 39.75, 40.09, 55.98, 52.99, 56.02], [129.53, 82.08, 31.92, 52.75, 33.5, 36.86, 56.68, 36.62]];
+        const leftistData = [{"name": "메지로맥퀸", "value": 85.86, "rank": 1}, {"name": "Ruffin_Debout!", "value": 75.51, "rank": 2}, {"name": "더블비앙코", "value": 73.87, "rank": 3}, {"name": "넌아직어준우승", "value": 64.34, "rank": 4}, {"name": "독립변수", "value": 63.07, "rank": 5}, {"name": "냐뤼링", "value": 62.13, "rank": 6}, {"name": "Alfred.M.Landon", "value": 62.12, "rank": 7}, {"name": "Hydrasplatling", "value": 60.3, "rank": 8}, {"name": "우지챠인레후", "value": 59.94, "rank": 9}, {"name": "까미유", "value": 59.83, "rank": 10}, {"name": "나카마사이치카", "value": 58.56, "rank": 11}, {"name": "토르쨩", "value": 57.96, "rank": 12}, {"name": "겨우르", "value": 57.81, "rank": 13}, {"name": "갤 평균", "value": 57.15, "rank": "-"}, {"name": "김두한", "value": 54.67, "rank": 14}, {"name": "EPiD여영원하라", "value": 50.5, "rank": 15}, {"name": "하시은", "value": 46.8, "rank": 16}, {"name": "전재수", "value": 35.44, "rank": 17}, {"name": "제갈현", "value": 0.0, "rank": 18}];
+        const histEconomy = {"labels": ["[28.2, 34.4]", "(34.4, 40.5]", "(40.5, 46.7]", "(46.7, 52.8]", "(52.8, 59.0]", "(59.0, 65.1]", "(65.1, 71.2]", "(71.2, 77.4]", "(77.4, 83.5]", "(83.5, 89.7]"], "data": [1, 1, 0, 0, 1, 3, 5, 3, 1, 3]};
+        const histDiplomacy = {"labels": ["[2.2, 8.9]", "(8.9, 15.5]", "(15.5, 22.2]", "(22.2, 28.9]", "(28.9, 35.6]", "(35.6, 42.2]", "(42.2, 48.9]", "(48.9, 55.6]", "(55.6, 62.2]", "(62.2, 68.9]"], "data": [1, 0, 1, 1, 0, 4, 7, 0, 0, 4]};
+        const histCivil = {"labels": ["[33.2, 37.6]", "(37.6, 42.0]", "(42.0, 46.3]", "(46.3, 50.7]", "(50.7, 55.1]", "(55.1, 59.5]", "(59.5, 63.9]", "(63.9, 68.2]", "(68.2, 72.6]", "(72.6, 77.0]"], "data": [1, 1, 1, 2, 4, 4, 3, 1, 0, 1]};
+        const histSociety = {"labels": ["[10.3, 15.5]", "(15.5, 20.6]", "(20.6, 25.8]", "(25.8, 30.9]", "(30.9, 36.1]", "(36.1, 41.3]", "(41.3, 46.4]", "(46.4, 51.6]", "(51.6, 56.7]", "(56.7, 61.9]"], "data": [1, 1, 2, 1, 5, 5, 0, 2, 0, 1]};
+        const histLeftist = {"labels": ["[0.0, 8.6]", "(8.6, 17.2]", "(17.2, 25.8]", "(25.8, 34.3]", "(34.3, 42.9]", "(42.9, 51.5]", "(51.5, 60.1]", "(60.1, 68.7]", "(68.7, 77.3]", "(77.3, 85.9]"], "data": [1, 0, 0, 0, 1, 2, 6, 5, 2, 1]};
+
+        const meanLeftist = 57.15;
+        const stdLeftist = 17.99;
+        const min_width = 106;
+
+        function getHeatmapColor(value) {
+            if (value === 0) return '#ffffff'; 
+            const mid = 27; 
+            const max = 55; 
+            if (value < mid) {
+                let ratio = value / mid;
+                let r = Math.round(167 + (255 - 167) * ratio);
+                let g = Math.round(218 + (255 - 218) * ratio);
+                let b = Math.round(172 + (255 - 172) * ratio);
+                return `rgb(${r}, ${g}, ${b})`;
+            } else {
+                let ratio = Math.min((value - mid) / (max - mid), 1);
+                let r = Math.round(255 - (255 - 246) * ratio);
+                let g = Math.round(255 - (255 - 114) * ratio);
+                let b = Math.round(255 - (255 - 128) * ratio);
+                return `rgb(${r}, ${g}, ${b})`;
+            }
+        }
+
+        function renderDistanceMatrix() {
+            const table = document.getElementById('distance-table');
+            let html = '<thead><tr>';
+            
+            html += '<th class="border border-gray-200 bg-gray-100"></th>';
+            distanceNames.forEach(name => {
+                html += `<th class="border border-gray-200 bg-gray-100 p-1 sm:p-2 text-[10px] sm:text-xs font-bold text-gray-700 cursor-pointer hover:bg-blue-100 transition-colors" onclick="showDetailView('${name}')">${name}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+
+            distanceNames.forEach((rowName, i) => {
+                html += `<tr><th class="border border-gray-200 bg-gray-50 p-1 sm:p-2 text-[10px] sm:text-xs font-bold text-gray-700 cursor-pointer hover:bg-blue-100 transition-colors" onclick="showDetailView('${rowName}')">${rowName}</th>`;
+                distanceNames.forEach((colName, j) => {
+                    const val = distanceMatrix[i][j];
+                    const color = getHeatmapColor(val);
+                    const displayVal = val === 0 ? '0' : val.toFixed(2);
+                    html += `<td class="border border-gray-200 p-1 sm:p-2 text-[10px] sm:text-xs font-semibold text-gray-800" style="background-color: ${color};">${displayVal}</td>`;
+                });
+                html += '</tr>';
+            });
+            
+            html += '</tbody>';
+            table.innerHTML = html;
+        }
+
+        // --- 모달 기능 ---
+        function showFullTable() {
+            const modal = document.getElementById('full-table-modal');
+            const container = document.getElementById('full-table-container');
+            
+            const originalTable = document.getElementById('distance-table');
+            const clonedTable = originalTable.cloneNode(true);
+            
+            clonedTable.id = 'cloned-distance-table';
+            
+            // 모달 안의 닉네임을 클릭하면 모달이 닫히고 기존 거리 상세보기가 작동하도록 수정
+            const headers = clonedTable.querySelectorAll('th[onclick]');
+            headers.forEach(th => {
+                const originalClick = th.getAttribute('onclick');
+                th.setAttribute('onclick', `closeFullTable(); ${originalClick}`);
+            });
+            
+            container.innerHTML = '';
+            container.appendChild(clonedTable);
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; 
+        }
+
+        function closeFullTable() {
+            document.getElementById('full-table-modal').classList.add('hidden');
+            document.body.style.overflow = 'auto'; 
+        }
+
+        function showDetailView(targetName) {
+            document.getElementById('distance-matrix-view').classList.add('hidden');
+            document.getElementById('distance-detail-view').classList.remove('hidden');
+            document.getElementById('distance-detail-view').classList.add('flex');
+            
+            document.getElementById('detail-target-name').textContent = targetName;
+            
+            // [추가된 부분] 갤 평균일 경우 '님' 글자를 뺍니다.
+            if (targetName === '갤 평균') {
+                document.getElementById('detail-target-suffix').textContent = '과의 성향 거리';
+            } else {
+                document.getElementById('detail-target-suffix').textContent = ' 님과의 성향 거리';
+            }
+            
+            const targetIndex = distanceNames.indexOf(targetName);
+            // ... (이하 동일)
+            let distances = [];
+            for (let i = 0; i < distanceNames.length; i++) {
+                if (i !== targetIndex) {
+                    distances.push({ name: distanceNames[i], distance: distanceMatrix[targetIndex][i] });
+                }
+            }
+            distances.sort((a, b) => a.distance - b.distance);
+            
+            const tbody = document.getElementById('detail-table-body');
+            let html = '';
+            distances.forEach((item, index) => {
+                const color = getHeatmapColor(item.distance);
+                html += `
+                    <tr class="hover:bg-gray-50 transition-colors border-b border-gray-100">
+                        <td class="p-3 font-bold text-gray-500">${index + 1}</td>
+                        <td class="p-3 font-bold text-gray-800">${item.name}</td>
+                        <td class="p-3 font-bold text-gray-900" style="background-color: ${color};">${item.distance.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+            document.getElementById('content-distance').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        function showMatrixView() {
+            document.getElementById('distance-detail-view').classList.add('hidden');
+            document.getElementById('distance-detail-view').classList.remove('flex');
+            document.getElementById('distance-matrix-view').classList.remove('hidden');
+            document.getElementById('content-distance').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function renderPartyDistanceTable() {
+            const table = document.getElementById('party-distance-table');
+            let html = '<tbody><tr class="bg-gray-100"><th class="border border-gray-200 p-2"></th>';
+            parties.forEach(party => {
+                html += `<th class="border border-gray-200 p-2 text-xs sm:text-sm font-bold text-gray-700">${party}</th>`;
+            });
+            html += '</tr>';
+
+            partyDistanceNames.forEach((userName, i) => {
+                html += `<tr><th class="border border-gray-200 p-2 bg-gray-50 text-xs sm:text-sm font-bold text-gray-700 text-left whitespace-nowrap">${userName}</th>`;
+                
+                const rowDistances = partyDistanceMatrix[i];
+                const minDistance = Math.min(...rowDistances);
+
+                partyDistanceMatrix[i].forEach((dist, j) => {
+                    const isMin = (dist === minDistance);
+                    const cellClass = isMin ? 'border border-gray-200 p-2 text-sm font-black text-blue-800 bg-blue-100' : 'border border-gray-200 p-2 text-sm text-gray-700';
+                    html += `<td class="${cellClass}">${dist.toFixed(2)}</td>`;
+                });
+                html += '</tr>';
+            });
+            html += '</tbody>';
+            table.innerHTML = html;
+        }
+
+        function getLeftistBadgeColor(value) {
+            const usersOnly = leftistData.filter(item => item.rank !== "-");
+            const scores = usersOnly.map(item => item.value);
+            
+            // 데이터가 없을 경우를 대비한 기본값
+            if (scores.length === 0) return 'rgb(255, 255, 255)';
+
+            const min = Math.min(...scores);
+            const max = Math.max(...scores);
+            const mid = (min + max) / 2;
+            
+            // 모든 값이 같을 경우 오류 방지
+            if (max === min) return 'rgb(255, 255, 255)';
+            
+            if (value <= mid) {
+                let ratio = Math.max(0, (value - min) / (mid - min));
+                return `rgb(${Math.round(96 + 159 * ratio)}, ${Math.round(165 + 90 * ratio)}, ${Math.round(250 + 5 * ratio)})`;
+            } else {
+                let ratio = Math.min(1, (value - mid) / (max - mid));
+                return `rgb(${Math.round(255 - 9 * ratio)}, ${Math.round(255 - 141 * ratio)}, ${Math.round(255 - 127 * ratio)})`;
+            }
+        }
+
+        function renderLeftistTable() {
+            const tbody = document.getElementById('leftist-table-body');
+            let html = '';
+            leftistData.forEach(item => {
+                const badgeColor = getLeftistBadgeColor(item.value);
+                const isSpecial = item.rank === "-";
+                const rowClass = isSpecial ? "bg-gray-50 text-gray-500 text-sm" : "hover:bg-gray-50 text-gray-800 font-medium";
+                const nameClass = isSpecial ? "font-medium" : "font-bold";
+                html += `<tr class="border-b border-gray-100 ${rowClass} transition-colors">
+                            <td class="p-3 ${item.rank === 1 ? 'text-red-500 font-black text-lg' : ''}">${item.rank}</td>
+                            <td class="p-3 ${nameClass}">${item.name}</td>
+                            <td class="p-3"><div class="inline-block px-4 py-1.5 rounded-lg shadow-sm font-bold text-gray-900 min-w-[80px]" style="background-color: ${badgeColor};">${item.value}</div></td>
+                        </tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function getEstimatedRank(score, mean, std, totalPopulation) {
+            let z = (score - mean) / std;
+            let t = 1 / (1 + 0.2315419 * Math.abs(z));
+            let d = 0.3989423 * Math.exp(-z * z / 2);
+            let prob = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+            if (z > 0) prob = 1 - prob;
+            
+            let pGreaterThan = 1 - prob;
+            let rank = Math.round(pGreaterThan * totalPopulation);
+            if (rank < 1) rank = 1;
+            if (rank > totalPopulation) rank = totalPopulation;
+            
+            return rank;
+        }
+
+        function renderEstimatedRankTable() {
+            const mean = meanLeftist;
+            const std = stdLeftist;
+            const totalPop = 1000;
+            
+            const tbody = document.getElementById('estimated-rank-table-body');
+            let html = '';
+            
+            const usersOnly = leftistData.filter(item => item.rank !== "-");
+            
+            usersOnly.forEach(item => {
+                const estimatedRank = getEstimatedRank(item.value, mean, std, totalPop);
+                
+                html += `
+                    <tr class="hover:bg-gray-50 transition-colors border-b border-gray-100">
+                        <td class="p-2 text-sm text-gray-800 font-bold">${item.name}</td>
+                        <td class="p-2 text-sm text-blue-600 font-bold">${estimatedRank}등 <span class="text-xs text-gray-400 font-normal">/ 1000명</span></td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            renderDistanceMatrix();
+            renderPartyDistanceTable();
+            renderLeftistTable();
+            renderEstimatedRankTable(); // 누락되었던 가상 랭킹 함수 호출 추가
+
+            const commonOptions = {
+                responsive: true, maintainAspectRatio: false,
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } }, x: { grid: { display: false }, ticks: { font: { size: 10 } } } },
+                plugins: { legend: { display: false }, tooltip: { callbacks: { title: ctx => '구간: ' + ctx[0].label, label: ctx => '빈도수: ' + ctx.parsed.y + '명' } } }
+            };
+
+            const charts = ['Economy', 'Diplomacy', 'Civil', 'Society', 'Leftist'];
+            const histData = [histEconomy, histDiplomacy, histCivil, histSociety, histLeftist];
+
+            charts.forEach((chartName, idx) => {
+                let options = { ...commonOptions };
+                if (chartName === 'Society' || chartName === 'Leftist') {
+                    options.scales = { ...options.scales, x: { ...options.scales.x, ticks: { font: { size: 9 }, maxRotation: 45, minRotation: 45 } } };
+                }
+                new Chart(document.getElementById(`chart${chartName}`), {
+                    type: 'bar',
+                    data: {
+                        labels: histData[idx].labels,
+                        datasets: [{ data: histData[idx].data, backgroundColor: 'rgba(96, 165, 250, 0.9)', borderColor: 'white', borderWidth: 1, barPercentage: 1.0, categoryPercentage: 1.0 }]
+                    },
+                    options: options
+                });
+            });
+        });
+    </script>
+</body>
+</html>
